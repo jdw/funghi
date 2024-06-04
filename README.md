@@ -1,2 +1,2 @@
-# funghi
-A webIDL parser
+# Funghi
+A webIDL parser library.
