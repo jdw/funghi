@@ -1,26 +1,31 @@
 package com.github.jdw.funghi.fragments.builders
 
+import com.github.jdw.funghi.fragments.IdlExtendedAttribute
 import echt
 import popIfFirstStartsWith
 import toPieces
 
-class IdlAttributeBuilder: IdlMemberBuilder(), IdlFragmentBuilder {
-	var extendedAttributes: MutableList<IdlExtendedAttributeBuilder>? = null
+class IdlConstructorOperationBuilder: IdlMemberBuilder(), IdlFragmentBuilder {
+	var extendedAttributes: MutableList<IdlExtendedAttribute> = mutableListOf()
+
 
 	override fun supportedKeywords(): Set<String> {
 		TODO("Not yet implemented")
 	}
 
+
 	override fun parseLine(line: String) {
 		val pieces = line.toPieces()
-		val (found, result) = pieces.popIfFirstStartsWith("[")
+
+		val (found, extendedAttributeRaw) = pieces.popIfFirstStartsWith("[")
 		found.echt {
-			extendedAttributes = mutableListOf()
 			IdlExtendedAttributeBuilder()
-				.apply { parseLine(result) }
-				.apply { extendedAttributes!! += this }
+				.apply { parseLine(extendedAttributeRaw) }
+				.apply {  }
 		}
+
 	}
+
 
 	override fun lineIsRelevant(line: String): Boolean {
 		TODO("Not yet implemented")

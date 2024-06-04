@@ -10,29 +10,11 @@ class IdlModel(builder: IdlModelBuilder) {
 	val interfaces: List<IdlInterface> =
 		if (builder.partialInterfaces.isNotEmpty() || builder.interfaces.isNotEmpty()) {
 			val ret = mutableListOf<IdlInterface>()
-			builder
-				.interfaces
-				.forEach {
-					try {
-						ret += IdlInterface(it)
-					}
-					catch (e: Exception) {
-						errors += e.message
-							?: "An error occurred while building interface '${it.name}'!"
-					}
-				}
-
+			ret.addAll(builder.interfaces)
 			builder
 				.partialInterfaces
-				.values
-				.forEach {
-					try {
-						ret += IdlInterface(it)
-					}
-					catch (e: Exception) {
-						errors += e.message
-							?: "An error occurred while building partial interface '${it.name}'!"
-					}
+				.forEach { (_, interfaze) ->
+					ret += IdlInterface(interfaze)
 				}
 			ret.toList()
 		}

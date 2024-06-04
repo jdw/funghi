@@ -11,12 +11,49 @@ class IdlInterfaceBuilder() : IdlFragmentBuilder {
 	var isPartial = false
 	var superTypes: MutableList<String>? = null
 	var name: String? = null
+	var members: MutableList<IdlMemberBuilder>? = null
 
 	override fun supportedKeywords(): Set<String> = Glob.currentParserSettings!!.interfaceKeywords()
 
 
 	override fun parseLine(line: String) {
+		if (null == members) members = mutableListOf()
 
+		var weHaveFoundUsAConstructor = false
+		Glob
+			.currentParserSettings!!
+			.constructorOperationDefinitionKeywords()
+			.forEach { keyword ->
+				line.contains("$keyword(")
+					.echt {
+						weHaveFoundUsAConstructor = true
+						IdlConstructorOperationBuilder()
+							.apply { parseLine(line) }
+							.apply { members!!.add(this) }
+					}
+			}
+
+		if (weHaveFoundUsAConstructor) return
+
+		var weHaveFoundUsAnAttribute = false
+		Glob
+			.currentParserSettings!!
+			.attributeDefinitionKeywords()
+			.forEach { keyword ->
+				line.contains(keyword)
+					.echt {
+						weHaveFoundUsAnAttribute = true
+						IdlAttributeBuilder()
+							.apply { parseLine(line) }
+							.apply { members!!.add(this) }
+					}
+			}
+
+		if (weHaveFoundUsAnAttribute) return
+
+		IdlOperationBuilder()
+			.apply { parseLine(line) }
+			.apply { members!!.add(this) }
 	}
 
 

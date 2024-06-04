@@ -13,6 +13,9 @@ enum class ParserSettings {
 		override fun complexTypesNameIsProhibited(name: String): Boolean = identifierReservedKeywords().contains(name) || name.startsWith("_")
 		override fun nullableMarkers(): Set<String> = setOf("?")
 		override fun arrayMarkers(): Set<String> = setOf("[]")
+		override fun operationRegex(): Regex = "".toRegex()
+		override fun constructorOperationDefinitionKeywords(): Set<String> = setOf("constructor")
+		override fun attributeDefinitionKeywords(): Set<String> = setOf("attribute")
 	};
 
 	abstract fun interfaceKeywords(): Set<String>
@@ -26,4 +29,7 @@ enum class ParserSettings {
 	abstract fun complexTypesNameIsProhibited(name: String): Boolean
 	abstract fun nullableMarkers(): Set<String>
 	abstract fun arrayMarkers(): Set<String>
+	abstract fun operationRegex(): Regex
+	abstract fun constructorOperationDefinitionKeywords(): Set<String>
+	abstract fun attributeDefinitionKeywords(): Set<String>
 }

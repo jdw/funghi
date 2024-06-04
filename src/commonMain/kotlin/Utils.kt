@@ -12,6 +12,22 @@ fun MutableList<String>.popIfPresent(value: String): Boolean {
 	}
 }
 
+
+fun MutableList<String>.popIfFirstStartsWith(value: String): Pair<Boolean, String> {
+	if (first().startsWith(value)) {
+		val ret = Pair(true, first())
+		removeFirst()
+		return ret
+	}
+
+	return Pair(false, "")
+}
+
+
+fun String.toPieces(): MutableList<String> {
+	return this.split(" ").toMutableList()
+}
+
 /**
  * Invokes *block* if receiver is *true* then returns receiver.
  *

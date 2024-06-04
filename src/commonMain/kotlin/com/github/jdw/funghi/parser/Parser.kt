@@ -1,5 +1,9 @@
 package com.github.jdw.funghi.parser
 
+import com.github.jdw.funghi.fragments.IdlDictionary
+import com.github.jdw.funghi.fragments.IdlEnum
+import com.github.jdw.funghi.fragments.IdlInterface
+import com.github.jdw.funghi.fragments.IdlTypedef
 import com.github.jdw.funghi.fragments.builders.IdlDictionaryBuilder
 import com.github.jdw.funghi.fragments.builders.IdlEnumBuilder
 import com.github.jdw.funghi.fragments.builders.IdlInterfaceBuilder
@@ -10,30 +14,36 @@ import com.github.jdw.funghi.model.builders.IdlModelBuilder
 internal class Parser(val settings: ParserSettings, val filename: String) {
 	fun parse(data: String): IdlModel {
 		Glob.currentParserSettings = settings
-		val data1 = step10_removeLineComments(data)
-		val data2 = step20_removeBlockComments(data1)
-		val data3 = step30_removeAllWhiteSpacesExceptOneSpace(data2)
-		val data4 = step40_insertNewlineAtTheRightPlaces(data3)
+		val data05 = step05_addLineNumbers(data)
+		val data10 = step10_removeLineComments(data)
+		val data20 = step20_removeBlockComments(data10)
+		val data30 = step30_removeAllWhiteSpacesExceptOneSpace(data20)
+		val data40 = step40_insertNewlineAtTheRightPlaces(data30)
 		var interfaceBuilder: IdlInterfaceBuilder? = null
 		var dictionaryBuilder: IdlDictionaryBuilder? = null
 		val builder = IdlModelBuilder()
-		var attributeLine = ""
+		var extendedAttributeLine = ""
 
-		step50_splitOnNewLine(data4).forEach { lineRaw ->
+		step50_splitOnNewLine(data40).forEach { lineRaw ->
 			val line = lineRaw.trim()
 
-			if (null != interfaceBuilder) {
+			println(line)
+			if (line.startsWith("[") /* && null == interfaceBuilder */) {
+				extendedAttributeLine = line
+			}
+			else if (null != interfaceBuilder) {
 				if ("};" == line) {
-					builder.interfaces += interfaceBuilder!!
+					builder.interfaces += IdlInterface(interfaceBuilder!!)
 					interfaceBuilder = null
 				}
 				else {
-					interfaceBuilder!!.parseLine(line)
+					if ("" != extendedAttributeLine) interfaceBuilder!!.parseLine("$extendedAttributeLine $line")
+					else interfaceBuilder!!.parseLine(line)
 				}
 			}
 			else if (null != dictionaryBuilder) {
 				if ("};" == line) {
-					builder.dictionaries += dictionaryBuilder!!
+					builder.dictionaries += IdlDictionary(dictionaryBuilder!!)
 					dictionaryBuilder = null
 				}
 				else {
@@ -41,12 +51,10 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 				}
 			}
 			else {
-				if (line.startsWith("[") /* && null == interfaceBuilder */) {
-					attributeLine = line
-				}
-				else if (line.contains("interface")) {
-					interfaceBuilder = IdlInterfaceBuilder.parseDefiningLines(attributeLine, line, builder)
-					interfaceBuilder!!.parseLine(line)
+				if (line.contains("interface")) {
+					interfaceBuilder = IdlInterfaceBuilder.parseDefiningLines(extendedAttributeLine, line, builder)
+					//interfaceBuilder!!.parseLine(line)
+					extendedAttributeLine = ""
 				}
 				else if (line.contains("dictionary")) {
 					dictionaryBuilder = IdlDictionaryBuilder()
@@ -55,12 +63,12 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 				else if (line.contains("enum")) {
 					val enumBuilder = IdlEnumBuilder()
 					//enumBuilder.parseLine(line)
-					builder.enums += enumBuilder
+					builder.enums += IdlEnum(enumBuilder)
 				}
 				else if (line.contains("typedef")) {
 					val typedefBuilder = IdlTypedefBuilder()
 					//typedefBuilder.parseLine(line)
-					builder.typedefs += typedefBuilder
+					builder.typedefs += IdlTypedef(typedefBuilder)
 				}
 			}
 		}
@@ -131,5 +139,11 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 			}
 
 		return ret.joinToString(" ")
+	}
+
+
+	private fun step05_addLineNumbers(data: String): String {
+		data
+			.split()
 	}
 }
