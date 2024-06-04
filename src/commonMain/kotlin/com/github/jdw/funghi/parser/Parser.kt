@@ -1,101 +1,162 @@
 package com.github.jdw.funghi.parser
 
-import com.github.jdw.funghi.fragments.IdlDictionary
-import com.github.jdw.funghi.fragments.IdlEnum
-import com.github.jdw.funghi.fragments.IdlInterface
-import com.github.jdw.funghi.fragments.IdlTypedef
-import com.github.jdw.funghi.fragments.builders.IdlDictionaryBuilder
-import com.github.jdw.funghi.fragments.builders.IdlEnumBuilder
-import com.github.jdw.funghi.fragments.builders.IdlInterfaceBuilder
-import com.github.jdw.funghi.fragments.builders.IdlTypedefBuilder
+import Glob
 import com.github.jdw.funghi.model.IdlModel
 import com.github.jdw.funghi.model.builders.IdlModelBuilder
+import throws
+import toPieces
 
 internal class Parser(val settings: ParserSettings, val filename: String) {
 	fun parse(data: String): IdlModel {
 		Glob.currentParserSettings = settings
-		val data05 = step05_addLineNumbers(data)
-		val data10 = step10_removeLineComments(data)
-		val data20 = step20_removeBlockComments(data10)
-		val data30 = step30_removeAllWhiteSpacesExceptOneSpace(data20)
-		val data40 = step40_insertNewlineAtTheRightPlaces(data30)
-		var interfaceBuilder: IdlInterfaceBuilder? = null
-		var dictionaryBuilder: IdlDictionaryBuilder? = null
+		val data05 = step05AddLineNumbers(data)
+		val data10 = step10RemoveLineComments(data05)
+		val data20 = step20RemoveBlockComments(data10)
+		val data25 = step25EmptyArrayAndEmptyDictionaryToKeywords(data20);
+		val data30 = step30RemoveAllWhiteSpacesExceptOneSpace(data25)
+		val data40 = step40InsertNewlineAtTheRightPlaces(data30)
+		val data50 = step50InsertStartOfScopeKeywordAndEndOfScopeKeywordAtTheRightPlaces(data40)
+		val data60 = step60TrimPieces(data50)
 		val builder = IdlModelBuilder()
-		var extendedAttributeLine = ""
 
-		step50_splitOnNewLine(data40).forEach { lineRaw ->
-			val line = lineRaw.trim()
+		println(data60)
 
-			println(line)
-			if (line.startsWith("[") /* && null == interfaceBuilder */) {
-				extendedAttributeLine = line
-			}
-			else if (null != interfaceBuilder) {
-				if ("};" == line) {
-					builder.interfaces += IdlInterface(interfaceBuilder!!)
-					interfaceBuilder = null
-				}
-				else {
-					if ("" != extendedAttributeLine) interfaceBuilder!!.parseLine("$extendedAttributeLine $line")
-					else interfaceBuilder!!.parseLine(line)
-				}
-			}
-			else if (null != dictionaryBuilder) {
-				if ("};" == line) {
-					builder.dictionaries += IdlDictionary(dictionaryBuilder!!)
-					dictionaryBuilder = null
-				}
-				else {
-					//dictionaryBuilder!!.parseLine(line)
-				}
-			}
-			else {
-				if (line.contains("interface")) {
-					interfaceBuilder = IdlInterfaceBuilder.parseDefiningLines(extendedAttributeLine, line, builder)
-					//interfaceBuilder!!.parseLine(line)
-					extendedAttributeLine = ""
-				}
-				else if (line.contains("dictionary")) {
-					dictionaryBuilder = IdlDictionaryBuilder()
-					//dictionaryBuilder!!.parseLine(line)
-				}
-				else if (line.contains("enum")) {
-					val enumBuilder = IdlEnumBuilder()
-					//enumBuilder.parseLine(line)
-					builder.enums += IdlEnum(enumBuilder)
-				}
-				else if (line.contains("typedef")) {
-					val typedefBuilder = IdlTypedefBuilder()
-					//typedefBuilder.parseLine(line)
-					builder.typedefs += IdlTypedef(typedefBuilder)
-				}
-			}
-		}
 
 		return IdlModel(builder)
 	}
 
 
-	private fun step50_splitOnNewLine(data: String): List<String> = data.split("\n")
+	private fun step60TrimPieces(data: String): String = mutableListOf<String>()
+		.apply {
+			data
+				.toPieces()
+				.forEach { piece ->
+					if (piece.isNotEmpty() && piece.isNotBlank()) add(piece.trim().replace("\n", " "))} }.joinToString(" ")
 
 
-	private fun step40_insertNewlineAtTheRightPlaces(data: String): String {
+	private fun step25EmptyArrayAndEmptyDictionaryToKeywords(data: String): String {
 		return data
-			.replace("]", "]\n")
-			.replace(";", ";\n")
-			.replace("{", "{\n")
+			.replace("= [],", "= ${Glob.emptyArrayKeyword} ,")
+			.replace("= {},", "= ${Glob.emptyDictionaryKeyword} ,")
+			.replace("= [];", "= ${Glob.emptyArrayKeyword} ;")
+			.replace("= {};", "= ${Glob.emptyDictionaryKeyword} ;")
+			.replace("= [])", "= ${Glob.emptyArrayKeyword} )")
+			.replace("= {})", "= ${Glob.emptyDictionaryKeyword} )")
+
 	}
 
 
-	private fun step10_removeLineComments(data: String): String {
+	private fun step50InsertStartOfScopeKeywordAndEndOfScopeKeywordAtTheRightPlaces(data: String): String {
+		val ret = mutableListOf<String>()
+
+		var currentScope = ""
+		val lines = data.split("\n")
+		for (idx in lines.indices) {
+			val line = lines[idx].trim()
+			if (line.contains("[") && line.contains("]")) {
+				ret += "${Glob.extendedAttributeStartScopeKeyword} $line ${Glob.extendedAttributeEndScopeKeyword}"
+				continue
+			}
+
+			if (line.contains("attribute")) {
+				if (line.endsWith(";")) ret += "${Glob.attributeStartScopeKeyword} $line ${Glob.attributeEndScopeKeyword}"
+				else ret += "${Glob.attributeStartScopeKeyword} $line"
+
+				continue
+			}
+
+			if (line.contains("interface")) {
+				currentScope = "interface"
+				ret += "${Glob.interfaceStartScopeKeyword} $line"
+				continue
+			}
+
+			if (line.contains("dictionary")) {
+				currentScope = "dictionary"
+				ret += "${Glob.dictionaryStartScopeKeyword} $line"
+				continue
+			}
+
+			if (line.contains("enum")) {
+				ret += "${Glob.enumStartScopeKeyword} $line ${Glob.enumEndScopeKeyword}"
+				continue
+			}
+
+			if (line.contains("typedef")) {
+				ret += "${Glob.typedefStartScopeKeyword} $line ${Glob.typedefEndScopeKeyword}"
+				continue
+			}
+
+			if (line.contains("constructor(")) {
+				ret += "${Glob.operationConstructorStartScopeKeyword} $line ${Glob.operationConstructorEndScopeKeyword}"
+				continue
+			}
+
+			if (line.contains("};")) {
+				if ("" == currentScope) throws()
+				ret += when (currentScope) {
+					"dictionary" -> "$line ${Glob.dictionaryEndScopeKeyword}"
+					"interface" -> "$line ${Glob.interfaceEndScopeKeyword}"
+					else -> throws()
+				}
+
+				continue
+			}
+
+			if (line.contains("getter") || line.contains("setter") || line.contains("deleter")) {
+				ret += "${Glob.operationStartScopeKeyword} $line ${Glob.operationEndScopeKeyword}"
+				continue
+			}
+
+			if (line.contains("(") && !line.contains("constructor")) {
+				val values = Glob
+					.currentParserSettings!!
+					.operationRegex()
+					.find(line)
+					?.groupValues
+					?: emptyList()
+
+				if (values.isNotEmpty()) {
+					ret += "${Glob.operationStartScopeKeyword} $line ${Glob.operationEndScopeKeyword}"
+					continue
+				}
+			}
+
+			if (line.contains("=")) {
+				if (line.contains("const")) ret += "${Glob.constAttributeStartScopeKeyword} $line ${Glob.constAttributeEndScopeKeyword}"
+				else ret += "${Glob.dictionaryMemberStartScopeKeyword} $line ${Glob.dictionaryMemberEndScopeKeyword}"
+				continue
+			}
+
+			if (line.contains("includes")) {
+				ret += "${Glob.includesStartScopeKeyword} $line ${Glob.includesEndScopeKeyword}"
+				continue
+			}
+
+			if (line.endsWith(";")) ret += "$line ${Glob.attributeEndScopeKeyword}"
+			else ret += line
+		}
+
+		return ret.joinToString("\n")
+	}
+
+
+	private fun step40InsertNewlineAtTheRightPlaces(data: String): String {
+		return data
+			.replace("[", "\n[")
+			.replace("]", "]\n")
+			.replace(";", ";\n")
+			.replace("{ ", "{\n ")
+	}
+
+
+	private fun step10RemoveLineComments(data: String): String {
 		val ret = mutableListOf<String>()
 
 		data
 			.split("\n")
 			.forEach { line ->
-				ret += if (line.startsWith("//")) ""
-				else if (line.contains("//")) line.split("//").first()
+				ret += if (line.contains("//")) line.split("//").first()
 				else line
 			}
 
@@ -103,7 +164,7 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 	}
 
 
-	private fun step20_removeBlockComments(data: String): String {
+	private fun step20RemoveBlockComments(data: String): String {
 		val ret = mutableListOf<String>()
 
 		var weAreInABlockComment = false
@@ -127,7 +188,7 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 		return ret.joinToString(" ")
 	}
 
-	private fun step30_removeAllWhiteSpacesExceptOneSpace(data: String): String {
+	private fun step30RemoveAllWhiteSpacesExceptOneSpace(data: String): String {
 		val ret = mutableListOf<String>()
 
 		data
@@ -142,8 +203,17 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 	}
 
 
-	private fun step05_addLineNumbers(data: String): String {
+	private fun step05AddLineNumbers(data: String): String {
+		val ret = mutableListOf<String>()
+		var lineNumber = 1
 		data
-			.split()
+			.split("\n")
+			.forEach { lineRaw ->
+				val line = lineRaw.trim()
+				ret += "${Glob.lineNumberKeyword}$lineNumber $line"
+				lineNumber++
+			}
+
+		return ret.joinToString("\n")
 	}
 }

@@ -3,6 +3,8 @@ fun throws(): Nothing = throw Exception()
 fun noop(): Unit {}
 
 fun MutableList<String>.popIfPresent(value: String): Boolean {
+	popUnitlNotLineNumber()
+
 	return if (value == first()) {
 		removeFirst()
 		true
@@ -14,6 +16,8 @@ fun MutableList<String>.popIfPresent(value: String): Boolean {
 
 
 fun MutableList<String>.popIfFirstStartsWith(value: String): Pair<Boolean, String> {
+	popUnitlNotLineNumber()
+
 	if (first().startsWith(value)) {
 		val ret = Pair(true, first())
 		removeFirst()
@@ -21,6 +25,14 @@ fun MutableList<String>.popIfFirstStartsWith(value: String): Pair<Boolean, Strin
 	}
 
 	return Pair(false, "")
+}
+
+
+fun MutableList<String>.popUnitlNotLineNumber() {
+	while (first().startsWith(Glob.lineNumberKeyword)) {
+		Glob.lineNumber = first()
+		removeFirst()
+	}
 }
 
 
