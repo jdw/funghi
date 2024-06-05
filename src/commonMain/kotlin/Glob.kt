@@ -5,7 +5,7 @@ object Glob {
 	val version = "0.0.1"
 	var filename = ""
 	var pieces: Pieces? = null
-	var currentParserSettings: ParserSettings? = null
+	var parserSettings: ParserSettings? = null
 	val keywordStart = "___FUNGHI_KEYWORD_"
 	val lineNumberKeyword = "${keywordStart}LINE_NUMBER_"
 	val emptyArrayKeyword = "${keywordStart}EMPTY_ARRAY"

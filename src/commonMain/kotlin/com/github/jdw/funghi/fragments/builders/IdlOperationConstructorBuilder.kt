@@ -3,7 +3,7 @@ package com.github.jdw.funghi.fragments.builders
 import com.github.jdw.funghi.fragments.IdlExtendedAttribute
 import com.github.jdw.funghi.pieces.Pieces
 
-class IdlConstructorOperationBuilder: IdlMemberBuilder(), IdlFragmentBuilder {
+class IdlOperationConstructorBuilder: IdlMemberBuilder(), IdlFragmentBuilder {
 	var extendedAttributes: MutableList<IdlExtendedAttribute> = mutableListOf()
 
 

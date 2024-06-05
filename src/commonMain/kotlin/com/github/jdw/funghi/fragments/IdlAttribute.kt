@@ -1,14 +1,7 @@
 package com.github.jdw.funghi.fragments
 
 import com.github.jdw.funghi.fragments.builders.IdlAttributeBuilder
-import com.github.jdw.funghi.fragments.builders.IdlExtendedAttributeBuilder
 
-open class IdlAttribute: IdlFragment {
-	constructor(builder: IdlAttributeBuilder) {
+open class IdlAttribute(builder: IdlAttributeBuilder): IdlMember() {
 
-	}
-
-	constructor(builder: IdlExtendedAttributeBuilder) {
-
-	}
 }

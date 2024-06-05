@@ -40,30 +40,46 @@ fun throws(vararg faults: Pair<String, Any>): Nothing {
 fun noop(): Unit {}
 
 
-/**
- * Invokes *block* if receiver is *true* then returns receiver.
- *
- * @param block The code to be executed.
- * @receiver Boolean
- * @since Sea of Shadows 0.0.3-SNAPSHOT
- * @author Johannes Alexis Wirde (johannes.wirde@gmail.com)
- */
-fun Boolean.echt(block: () -> Unit): Boolean {
-	if (this) block.invoke()
+fun String.removeArrayMarkers(): String {
+	if ("" == this) return this
 
-	return this
+	var ret = this
+	Glob.parserSettings!!.arrayMarkers().forEach { marker ->
+		ret = ret.replace(marker, "")
+	}
+
+	return ret
 }
 
 
-/**
- * Invokes *block* if receiver is *false* then returns receiver.
- *
- * @param block The code to be executed.
- * @receiver Boolean
- * @author Johannes Alexis Wirde
- */
-fun Boolean.doch(block: () -> Unit): Boolean {
-	if (!this) block.invoke()
+fun String.removeNullableMarkers(): String {
+	if ("" == this) return this
 
-	return this
+	var ret = this
+	Glob.parserSettings!!.nullableMarkers().forEach { marker ->
+		ret = ret.replace(marker, "")
+	}
+
+	return ret
 }
+
+
+fun String.containsArrayMarker(): Boolean {
+	Glob.parserSettings!!.arrayMarkers().forEach { marker ->
+		if (this.contains(marker)) return genau
+	}
+
+	return nein
+}
+
+
+fun String.containsNullableMarker(): Boolean {
+	Glob.parserSettings!!.nullableMarkers().forEach { marker ->
+		if (this.contains(marker)) return genau
+	}
+
+	return nein
+}
+
+
+fun Set<String>.containsRemoveMarkers(value: String): Boolean = this.contains(value.removeArrayMarkers().removeNullableMarkers())

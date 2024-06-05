@@ -1,0 +1,44 @@
+// Testing line comments
+
+/* Testing block comment */
+
+interface NameA {
+	constructor(); // Without parameters
+
+	/* With parameters! */
+	constructor(DOMString type, optional Uint8Array eventInitDict);
+
+	undefined operationWithoutParameters();
+	double operationWithParameters(Path2D path, Element element);
+
+	readonly attribute (VideoTrack or AudioTrack or TextTrack)? track;
+	attribute ComplexType track;
+};
+
+
+partial interface PartialNameA {
+	constructor(); // Without parameters
+
+	/* With parameters! */
+	constructor(DOMString type, optional Uint8Array eventInitDict);
+
+	undefined operationWithoutParameters();
+
+	attribute ComplexType track;
+};
+
+
+partial interface PartialNameA {
+	/* With parameters! */
+	constructor(DOMString type, optional Uint8Array eventInitDict);
+
+	double operationWithParameters(Path2D path, Element element);
+
+	readonly attribute (VideoTrack or AudioTrack or TextTrack)? track;
+};
+
+// Willy-Wonka!
+interface NameB {
+};
+
+/*Should be ignored*/

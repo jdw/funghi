@@ -14,8 +14,17 @@ enum class ParserSettings {
 		override fun typedArrayTypesKeywords(): Set<String> = setOf("Int8Array", "Int16Array", "Int32Array", "Uint8Array", "Uint16Array", "Uint32Array", "Uint8ClampedArray", "BigInt64Array", "BigUint64Array", "Float16Array", "Float32Array", "Float64Array")
 		override fun bufferViewTypesKeywords(): Set<String> = setOf(*typedArrayTypesKeywords().toTypedArray(), "DataView")
 		override fun bufferSourceTypesKeywords(): Set<String> = setOf(*bufferTypesKeywords().toTypedArray(), *bufferViewTypesKeywords().toTypedArray())
+		override fun allPredefinedTypesKeywords(): Set<String> =
+			setOf(*integerTypesKeywords().toTypedArray(),
+				*numericTypesKeywords().toTypedArray(),
+				*primitiveTypesKeywords().toTypedArray(),
+				*stringTypesKeywords().toTypedArray(),
+				*bufferTypesKeywords().toTypedArray(),
+				*typedArrayTypesKeywords().toTypedArray(),
+				*bufferViewTypesKeywords().toTypedArray(),
+				*bufferSourceTypesKeywords().toTypedArray())
 		override fun argumentNameKeywords(): Set<String> = setOf("async", "attribute", "callback", "const", "constructor", "deleter", "dictionary", "enum", "getter", "includes", "inherit", "interface", "iterable", "maplike", "mixin", "namespace", "partial", "readonly", "required", "setlike", "setter", "static", "stringifier", "typedef", "unrestricted")
-		override fun complexTypesRegex(): Regex = "([a-zA-Z]).([a-zA-Z0-9_])+".toRegex()
+		override fun complexTypesRegex(): Regex = "([a-zA-Z]).([a-zA-Z0-9_])*".toRegex()
 		override fun identifierReservedKeywords(): Set<String> = setOf("constructor", "toString")
 		override fun complexTypesNameIsProhibited(name: String): Boolean = identifierReservedKeywords().contains(name) || name.startsWith("_")
 		override fun nullableMarkers(): Set<String> = setOf("?")
@@ -38,6 +47,7 @@ enum class ParserSettings {
 	abstract fun typedArrayTypesKeywords(): Set<String>
 	abstract fun bufferViewTypesKeywords(): Set<String>
 	abstract fun bufferSourceTypesKeywords(): Set<String>
+	abstract fun allPredefinedTypesKeywords(): Set<String>
 	abstract fun argumentNameKeywords(): Set<String>
 	abstract fun complexTypesRegex(): Regex
 	abstract fun identifierReservedKeywords(): Set<String>

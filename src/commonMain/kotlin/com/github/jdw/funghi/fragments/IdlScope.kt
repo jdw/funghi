@@ -1,6 +1,6 @@
 package com.github.jdw.funghi.fragments
 
-enum class IdlScopes {
+enum class IdlScope {
 	TYPEDEF,
 	DICTIONARY,
 	INTERFACE,
@@ -12,7 +12,8 @@ enum class IdlScopes {
 	CONST_ATTRIBUTE,
 	DICTIONARY_MEMBER,
 	EXTENDED_ATTRIBUTE,
-	MULTI_TYPE;
+	MULTI_TYPE,
+	MODEL;
 
 	fun startScopeKeyword(): String = "${Glob.startScopeKeyword}$name"
 	fun endScopeKeyword(): String = "${Glob.endScopeKeyword}$name"

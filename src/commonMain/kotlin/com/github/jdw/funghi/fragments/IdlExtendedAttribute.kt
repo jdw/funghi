@@ -36,7 +36,7 @@ import com.github.jdw.funghi.fragments.builders.IdlExtendedAttributeBuilder
  *
  * @author Johannes Alexis Wirde
  */
-class IdlExtendedAttribute(builder: IdlExtendedAttributeBuilder): IdlAttribute(builder) {
+class IdlExtendedAttribute(builder: IdlExtendedAttributeBuilder): IdlFragment {
 	enum class Type {
 		/**
 		 * * Grammar symbol = [ExtendedAttributeNoArgs](https://webidl.spec.whatwg.org/#prod-ExtendedAttributeNoArgs)

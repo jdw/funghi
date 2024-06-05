@@ -1,16 +1,25 @@
 package com.github.jdw.funghi.parser
 
 import Glob
-import com.github.jdw.funghi.fragments.IdlScopes
+import com.github.jdw.funghi.fragments.IdlExtendedAttribute
+import com.github.jdw.funghi.fragments.IdlInterface
+import com.github.jdw.funghi.fragments.IdlScope
+import com.github.jdw.funghi.fragments.builders.IdlExtendedAttributeBuilder
+import com.github.jdw.funghi.fragments.builders.IdlInterfaceBuilder
 import com.github.jdw.funghi.model.IdlModel
 import com.github.jdw.funghi.model.builders.IdlModelBuilder
 import com.github.jdw.funghi.pieces.Pieces
+import echt
+import genau
+
+
 import noop
 import throws
 
+
 internal class Parser(val settings: ParserSettings, val filename: String) {
-	fun parse(data: String): IdlModel {
-		Glob.currentParserSettings = settings
+	infix fun parse(data: String): IdlModel {
+		Glob.parserSettings = settings
 		Glob.filename = filename
 
 		val data05 = step05AddLineNumbers(data)
@@ -21,23 +30,49 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 		val data40 = step40InsertNewlineAtTheRightPlaces(data30)
 		val data50 = step50InsertStartOfScopeKeywordAndEndOfScopeKeywordAtTheRightPlaces(data40)
 		val data60 = step60TrimPieces(data50)
-		val pieces = step70ToPieces(data60)
+		val data65 = step65AddModelStartAndEndScope(data60)
+		val pieces = step70ToPieces(data65)
 		val builder = IdlModelBuilder()
+		var extendedAttribute: IdlExtendedAttribute? = null //TODO Should be list
 
-		when (pieces.popStartScopeThrowIfNot()) {
-			IdlScopes.DICTIONARY -> noop()
-			IdlScopes.TYPEDEF -> noop()
-			IdlScopes.ENUM -> noop()
-			IdlScopes.INTERFACE -> noop()
-			IdlScopes.EXTENDED_ATTRIBUTE -> noop()
-			else -> throws()
+		pieces popStartScopeThrowIfNot IdlScope.MODEL
+
+		Glob.parserSettings!!.allPredefinedTypesKeywords().sorted().forEach { println(it) }
+
+		while (pieces.peekIsStartScope()) {
+			when (pieces peekStartScopeThrow genau) {
+				IdlScope.DICTIONARY -> noop()
+				IdlScope.TYPEDEF -> noop()
+				IdlScope.ENUM -> noop()
+				IdlScope.INTERFACE -> {
+					println("--- kaka")
+					builder.interfaces += IdlInterface(IdlInterfaceBuilder()
+						.apply {
+							(null != extendedAttribute)
+								.echt { extendedAttributes += extendedAttribute!! }
+								.echt { extendedAttribute = null }
+						}
+						.apply { parse(pieces) })
+				}
+
+				IdlScope.EXTENDED_ATTRIBUTE -> {
+					extendedAttribute = IdlExtendedAttribute(IdlExtendedAttributeBuilder().apply { parse(pieces) })
+				}
+
+				else -> throws()
+			}
 		}
+
+		pieces popEndScopeThrowIfNot IdlScope.MODEL
 
 		return IdlModel(builder)
 	}
 
 
 	private fun step70ToPieces(data: String): Pieces = Pieces(data).apply { Glob.pieces = this }
+
+
+	private fun step65AddModelStartAndEndScope(data: String): String = "${IdlScope.MODEL.startScopeKeyword()} $data ${IdlScope.MODEL.endScopeKeyword()}"
 
 
 	private fun step60TrimPieces(data: String): String = mutableListOf<String>().apply { data.split(" ").forEach { piece -> if (piece.isNotEmpty() && piece.isNotBlank()) add(piece.trim().replace("\n", " "))} }.joinToString(" ")
@@ -58,54 +93,54 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 	private fun step50InsertStartOfScopeKeywordAndEndOfScopeKeywordAtTheRightPlaces(data: String): String {
 		val ret = mutableListOf<String>()
 
-		var currentScope: IdlScopes? = null
+		var currentScope: IdlScope? = null
 		val lines = data.split("\n")
 		for (idx in lines.indices) {
 			val line = lines[idx].trim()
 			if (line.contains("[") && line.contains("]")) {
-				ret += "${IdlScopes.EXTENDED_ATTRIBUTE.startScopeKeyword()} $line ${IdlScopes.EXTENDED_ATTRIBUTE.endScopeKeyword()}"
+				ret += "${IdlScope.EXTENDED_ATTRIBUTE.startScopeKeyword()} $line ${IdlScope.EXTENDED_ATTRIBUTE.endScopeKeyword()}"
 				continue
 			}
 
 			if (line.contains("attribute")) {
-				if (line.endsWith(";")) ret += "${IdlScopes.ATTRIBUTE.startScopeKeyword()} ${line.replace("attribute", "")} ${IdlScopes.ATTRIBUTE.endScopeKeyword()}"
-				else ret += "${IdlScopes.ATTRIBUTE.startScopeKeyword()} $line"
+				if (line.endsWith(";")) ret += "${IdlScope.ATTRIBUTE.startScopeKeyword()} ${line.replace("attribute", "")} ${IdlScope.ATTRIBUTE.endScopeKeyword()}"
+				else ret += "${IdlScope.ATTRIBUTE.startScopeKeyword()} $line"
 
 				continue
 			}
 
 			if (line.contains("interface")) {
-				currentScope = IdlScopes.INTERFACE
-				ret += "${IdlScopes.INTERFACE.startScopeKeyword()} $line"
+				currentScope = IdlScope.INTERFACE
+				ret += "${IdlScope.INTERFACE.startScopeKeyword()} $line"
 				continue
 			}
 
 			if (line.contains("dictionary")) {
-				currentScope = IdlScopes.DICTIONARY
-				ret += "${IdlScopes.DICTIONARY.startScopeKeyword()} $line"
+				currentScope = IdlScope.DICTIONARY
+				ret += "${IdlScope.DICTIONARY.startScopeKeyword()} $line"
 				continue
 			}
 
 			if (line.contains("enum")) {
-				ret += "${IdlScopes.ENUM.startScopeKeyword()} $line ${IdlScopes.ENUM.endScopeKeyword()}"
+				ret += "${IdlScope.ENUM.startScopeKeyword()} $line ${IdlScope.ENUM.endScopeKeyword()}"
 				continue
 			}
 
 			if (line.contains("typedef")) {
-				ret += "${IdlScopes.TYPEDEF.startScopeKeyword()} $line ${IdlScopes.TYPEDEF.endScopeKeyword()}"
+				ret += "${IdlScope.TYPEDEF.startScopeKeyword()} $line ${IdlScope.TYPEDEF.endScopeKeyword()}"
 				continue
 			}
 
 			if (line.contains("constructor(")) {
-				ret += "${IdlScopes.OPERATION_CONSTRUCTOR.startScopeKeyword()} $line ${IdlScopes.OPERATION_CONSTRUCTOR.endScopeKeyword()}"
+				ret += "${IdlScope.OPERATION_CONSTRUCTOR.startScopeKeyword()} $line ${IdlScope.OPERATION_CONSTRUCTOR.endScopeKeyword()}"
 				continue
 			}
 
 			if (line.contains("};")) {
 				if (null == currentScope) throws()
 				ret += when (currentScope) {
-					IdlScopes.DICTIONARY -> IdlScopes.DICTIONARY.endScopeKeyword()
-					IdlScopes.INTERFACE -> IdlScopes.INTERFACE.endScopeKeyword()
+					IdlScope.DICTIONARY -> IdlScope.DICTIONARY.endScopeKeyword()
+					IdlScope.INTERFACE -> IdlScope.INTERFACE.endScopeKeyword()
 					else -> throws()
 				}
 
@@ -113,36 +148,36 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 			}
 
 			if (line.contains("getter") || line.contains("setter") || line.contains("deleter")) {
-				ret += "${IdlScopes.OPERATION.startScopeKeyword()} $line ${IdlScopes.OPERATION.endScopeKeyword()}"
+				ret += "${IdlScope.OPERATION.startScopeKeyword()} $line ${IdlScope.OPERATION.endScopeKeyword()}"
 				continue
 			}
 
 			if (line.contains("(") && !line.contains("constructor")) {
 				val values = Glob
-					.currentParserSettings!!
+					.parserSettings!!
 					.operationRegex()
 					.find(line)
 					?.groupValues
 					?: emptyList()
 
 				if (values.isNotEmpty()) {
-					ret += "${IdlScopes.OPERATION.startScopeKeyword()} $line ${IdlScopes.OPERATION.endScopeKeyword()}"
+					ret += "${IdlScope.OPERATION.startScopeKeyword()} $line ${IdlScope.OPERATION.endScopeKeyword()}"
 					continue
 				}
 			}
 
 			if (line.contains("=")) {
-				if (line.contains("const")) ret += "${IdlScopes.CONST_ATTRIBUTE.startScopeKeyword()} $line ${IdlScopes.CONST_ATTRIBUTE.endScopeKeyword()}"
-				else ret += "${IdlScopes.DICTIONARY_MEMBER.startScopeKeyword()} $line ${IdlScopes.DICTIONARY_MEMBER.endScopeKeyword()}"
+				if (line.contains("const")) ret += "${IdlScope.CONST_ATTRIBUTE.startScopeKeyword()} $line ${IdlScope.CONST_ATTRIBUTE.endScopeKeyword()}"
+				else ret += "${IdlScope.DICTIONARY_MEMBER.startScopeKeyword()} $line ${IdlScope.DICTIONARY_MEMBER.endScopeKeyword()}"
 				continue
 			}
 
 			if (line.contains("includes")) {
-				ret += "${IdlScopes.INCLUDES.startScopeKeyword()} $line ${IdlScopes.INCLUDES.endScopeKeyword()}"
+				ret += "${IdlScope.INCLUDES.startScopeKeyword()} $line ${IdlScope.INCLUDES.endScopeKeyword()}"
 				continue
 			}
 
-			if (line.endsWith(";")) ret += "$line ${IdlScopes.ATTRIBUTE.endScopeKeyword()}"
+			if (line.endsWith(";")) ret += "$line ${IdlScope.ATTRIBUTE.endScopeKeyword()}"
 			else ret += line
 		}
 
