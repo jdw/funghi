@@ -1,12 +1,19 @@
 package com.github.jdw.funghi.parser
 
 enum class ParserSettings {
-	v20240408 {
+	V_20240408 {
 		override fun interfaceKeywords(): Set<String> = setOf("mixin")
 		override fun dictionaryKeywords(): Set<String> = setOf()
 		override fun typedefKeywords(): Set<String> = setOf()
 		override fun modelKeywords(): Set<String> = setOf("typedef", "interface", "dictionary", "enum")
-		override fun nonComplexTypesKeywords(): Set<String> = setOf("long", "long long", "DOMString", "double", "void", "undefined", "any")
+		override fun integerTypesKeywords(): Set<String> = setOf("byte", "octet", "short", "unsigned short", "long", "unsigned long", "long long", "unsigned long long")
+		override fun numericTypesKeywords(): Set<String> = setOf(*integerTypesKeywords().toTypedArray(), "float", "unrestricted float", "double", "unrestricted double")
+		override fun primitiveTypesKeywords(): Set<String> = setOf(*numericTypesKeywords().toTypedArray(), "bigint", "boolean")
+		override fun stringTypesKeywords(): Set<String> = setOf("DOMString", "ByteString", "USVString")
+		override fun bufferTypesKeywords(): Set<String> = setOf("ArrayBuffer", "SharedArrayBuffer")
+		override fun typedArrayTypesKeywords(): Set<String> = setOf("Int8Array", "Int16Array", "Int32Array", "Uint8Array", "Uint16Array", "Uint32Array", "Uint8ClampedArray", "BigInt64Array", "BigUint64Array", "Float16Array", "Float32Array", "Float64Array")
+		override fun bufferViewTypesKeywords(): Set<String> = setOf(*typedArrayTypesKeywords().toTypedArray(), "DataView")
+		override fun bufferSourceTypesKeywords(): Set<String> = setOf(*bufferTypesKeywords().toTypedArray(), *bufferViewTypesKeywords().toTypedArray())
 		override fun argumentNameKeywords(): Set<String> = setOf("async", "attribute", "callback", "const", "constructor", "deleter", "dictionary", "enum", "getter", "includes", "inherit", "interface", "iterable", "maplike", "mixin", "namespace", "partial", "readonly", "required", "setlike", "setter", "static", "stringifier", "typedef", "unrestricted")
 		override fun complexTypesRegex(): Regex = "([a-zA-Z]).([a-zA-Z0-9_])+".toRegex()
 		override fun identifierReservedKeywords(): Set<String> = setOf("constructor", "toString")
@@ -23,7 +30,14 @@ enum class ParserSettings {
 	abstract fun dictionaryKeywords(): Set<String>
 	abstract fun typedefKeywords(): Set<String>
 	abstract fun modelKeywords(): Set<String>
-	abstract fun nonComplexTypesKeywords(): Set<String>
+	abstract fun integerTypesKeywords(): Set<String>
+	abstract fun numericTypesKeywords(): Set<String>
+	abstract fun primitiveTypesKeywords(): Set<String>
+	abstract fun stringTypesKeywords(): Set<String>
+	abstract fun bufferTypesKeywords(): Set<String>
+	abstract fun typedArrayTypesKeywords(): Set<String>
+	abstract fun bufferViewTypesKeywords(): Set<String>
+	abstract fun bufferSourceTypesKeywords(): Set<String>
 	abstract fun argumentNameKeywords(): Set<String>
 	abstract fun complexTypesRegex(): Regex
 	abstract fun identifierReservedKeywords(): Set<String>

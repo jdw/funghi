@@ -1,14 +1,18 @@
 package com.github.jdw.funghi.parser
 
 import Glob
+import com.github.jdw.funghi.fragments.IdlScopes
 import com.github.jdw.funghi.model.IdlModel
 import com.github.jdw.funghi.model.builders.IdlModelBuilder
+import com.github.jdw.funghi.pieces.Pieces
+import noop
 import throws
-import toPieces
 
 internal class Parser(val settings: ParserSettings, val filename: String) {
 	fun parse(data: String): IdlModel {
 		Glob.currentParserSettings = settings
+		Glob.filename = filename
+
 		val data05 = step05AddLineNumbers(data)
 		val data10 = step10RemoveLineComments(data05)
 		val data20 = step20RemoveBlockComments(data10)
@@ -17,21 +21,26 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 		val data40 = step40InsertNewlineAtTheRightPlaces(data30)
 		val data50 = step50InsertStartOfScopeKeywordAndEndOfScopeKeywordAtTheRightPlaces(data40)
 		val data60 = step60TrimPieces(data50)
+		val pieces = step70ToPieces(data60)
 		val builder = IdlModelBuilder()
 
-		println(data60)
-
+		when (pieces.popStartScopeThrowIfNot()) {
+			IdlScopes.DICTIONARY -> noop()
+			IdlScopes.TYPEDEF -> noop()
+			IdlScopes.ENUM -> noop()
+			IdlScopes.INTERFACE -> noop()
+			IdlScopes.EXTENDED_ATTRIBUTE -> noop()
+			else -> throws()
+		}
 
 		return IdlModel(builder)
 	}
 
 
-	private fun step60TrimPieces(data: String): String = mutableListOf<String>()
-		.apply {
-			data
-				.toPieces()
-				.forEach { piece ->
-					if (piece.isNotEmpty() && piece.isNotBlank()) add(piece.trim().replace("\n", " "))} }.joinToString(" ")
+	private fun step70ToPieces(data: String): Pieces = Pieces(data).apply { Glob.pieces = this }
+
+
+	private fun step60TrimPieces(data: String): String = mutableListOf<String>().apply { data.split(" ").forEach { piece -> if (piece.isNotEmpty() && piece.isNotBlank()) add(piece.trim().replace("\n", " "))} }.joinToString(" ")
 
 
 	private fun step25EmptyArrayAndEmptyDictionaryToKeywords(data: String): String {
@@ -54,49 +63,49 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 		for (idx in lines.indices) {
 			val line = lines[idx].trim()
 			if (line.contains("[") && line.contains("]")) {
-				ret += "${Glob.extendedAttributeStartScopeKeyword} $line ${Glob.extendedAttributeEndScopeKeyword}"
+				ret += "${IdlScopes.EXTENDED_ATTRIBUTE.startScopeKeyword()} $line ${IdlScopes.EXTENDED_ATTRIBUTE.endScopeKeyword()}"
 				continue
 			}
 
 			if (line.contains("attribute")) {
-				if (line.endsWith(";")) ret += "${Glob.attributeStartScopeKeyword} $line ${Glob.attributeEndScopeKeyword}"
-				else ret += "${Glob.attributeStartScopeKeyword} $line"
+				if (line.endsWith(";")) ret += "${IdlScopes.ATTRIBUTE.startScopeKeyword()} ${line.replace("attribute", "")} ${IdlScopes.ATTRIBUTE.endScopeKeyword()}"
+				else ret += "${IdlScopes.ATTRIBUTE.startScopeKeyword()} $line"
 
 				continue
 			}
 
 			if (line.contains("interface")) {
 				currentScope = "interface"
-				ret += "${Glob.interfaceStartScopeKeyword} $line"
+				ret += "${IdlScopes.INTERFACE.startScopeKeyword()} $line"
 				continue
 			}
 
 			if (line.contains("dictionary")) {
 				currentScope = "dictionary"
-				ret += "${Glob.dictionaryStartScopeKeyword} $line"
+				ret += "${IdlScopes.DICTIONARY.startScopeKeyword()} $line"
 				continue
 			}
 
 			if (line.contains("enum")) {
-				ret += "${Glob.enumStartScopeKeyword} $line ${Glob.enumEndScopeKeyword}"
+				ret += "${IdlScopes.ENUM.startScopeKeyword()} $line ${IdlScopes.ENUM.endScopeKeyword()}"
 				continue
 			}
 
 			if (line.contains("typedef")) {
-				ret += "${Glob.typedefStartScopeKeyword} $line ${Glob.typedefEndScopeKeyword}"
+				ret += "${IdlScopes.TYPEDEF.startScopeKeyword()} $line ${IdlScopes.TYPEDEF.endScopeKeyword()}"
 				continue
 			}
 
 			if (line.contains("constructor(")) {
-				ret += "${Glob.operationConstructorStartScopeKeyword} $line ${Glob.operationConstructorEndScopeKeyword}"
+				ret += "${IdlScopes.OPERATION_CONSTRUCTOR.startScopeKeyword()} $line ${IdlScopes.OPERATION_CONSTRUCTOR.endScopeKeyword()}"
 				continue
 			}
 
 			if (line.contains("};")) {
 				if ("" == currentScope) throws()
 				ret += when (currentScope) {
-					"dictionary" -> "$line ${Glob.dictionaryEndScopeKeyword}"
-					"interface" -> "$line ${Glob.interfaceEndScopeKeyword}"
+					"dictionary" -> IdlScopes.DICTIONARY.endScopeKeyword()
+					"interface" -> IdlScopes.INTERFACE.endScopeKeyword()
 					else -> throws()
 				}
 
@@ -104,7 +113,7 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 			}
 
 			if (line.contains("getter") || line.contains("setter") || line.contains("deleter")) {
-				ret += "${Glob.operationStartScopeKeyword} $line ${Glob.operationEndScopeKeyword}"
+				ret += "${IdlScopes.OPERATION.startScopeKeyword()} $line ${IdlScopes.OPERATION.endScopeKeyword()}"
 				continue
 			}
 
@@ -117,23 +126,23 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 					?: emptyList()
 
 				if (values.isNotEmpty()) {
-					ret += "${Glob.operationStartScopeKeyword} $line ${Glob.operationEndScopeKeyword}"
+					ret += "${IdlScopes.OPERATION.startScopeKeyword()} $line ${IdlScopes.OPERATION.endScopeKeyword()}"
 					continue
 				}
 			}
 
 			if (line.contains("=")) {
-				if (line.contains("const")) ret += "${Glob.constAttributeStartScopeKeyword} $line ${Glob.constAttributeEndScopeKeyword}"
-				else ret += "${Glob.dictionaryMemberStartScopeKeyword} $line ${Glob.dictionaryMemberEndScopeKeyword}"
+				if (line.contains("const")) ret += "${IdlScopes.CONST_ATTRIBUTE.startScopeKeyword()} $line ${IdlScopes.CONST_ATTRIBUTE.endScopeKeyword()}"
+				else ret += "${IdlScopes.DICTIONARY_MEMBER.startScopeKeyword()} $line ${IdlScopes.DICTIONARY_MEMBER.endScopeKeyword()}"
 				continue
 			}
 
 			if (line.contains("includes")) {
-				ret += "${Glob.includesStartScopeKeyword} $line ${Glob.includesEndScopeKeyword}"
+				ret += "${IdlScopes.INCLUDES.startScopeKeyword()} $line ${IdlScopes.INCLUDES.endScopeKeyword()}"
 				continue
 			}
 
-			if (line.endsWith(";")) ret += "$line ${Glob.attributeEndScopeKeyword}"
+			if (line.endsWith(";")) ret += "$line ${IdlScopes.ATTRIBUTE.endScopeKeyword()}"
 			else ret += line
 		}
 

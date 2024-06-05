@@ -1,12 +1,9 @@
 package com.github.jdw.funghi.fragments.builders
 
-class IdlTypedefBuilder: IdlFragmentBuilder {
-	override fun supportedKeywords(): Set<String> = emptySet()
-	override fun parseLine(line: String) {
-		TODO("Not yet implemented")
-	}
+import com.github.jdw.funghi.pieces.Pieces
 
-	override fun lineIsRelevant(line: String): Boolean {
+class IdlTypedefBuilder: IdlFragmentBuilder {
+	override fun parse(pieces: Pieces) {
 		TODO("Not yet implemented")
 	}
 }

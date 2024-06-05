@@ -1,7 +1,7 @@
 package com.github.jdw.funghi.fragments.builders
 
+import com.github.jdw.funghi.pieces.Pieces
+
 interface IdlFragmentBuilder {
-	fun supportedKeywords(): Set<String>
-	fun parseLine(line: String)
-	fun lineIsRelevant(line: String): Boolean
+	fun parse(pieces: Pieces)
 }
