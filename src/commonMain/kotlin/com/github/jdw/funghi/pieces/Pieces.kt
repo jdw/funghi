@@ -2,12 +2,13 @@ package com.github.jdw.funghi.pieces
 
 import com.github.jdw.funghi.fragments.IdlScopes
 import doch
+import echt
 import throws
 
 class Pieces(data: String) {
 	private val pieces = data.split(" ").toMutableList()
 	private val previousPieces = mutableListOf<String>()
-	private val previousScopeStarts = mutableListOf<IdlScopes>()
+	private val startedScopes = mutableListOf<IdlScopes>()
 
 	init {
 		popUntilNotLineNumber()
@@ -43,8 +44,22 @@ class Pieces(data: String) {
 
 	fun popStartScopeThrowIfNot(): IdlScopes {
 		val (_, value) = popIfFirstStartsWithThrowIfNot(Glob.startScopeKeyword)
+		val enumValue = IdlScopes.valueOf(value.replace(Glob.startScopeKeyword, ""))
+		startedScopes.add(0, enumValue)
 
-		return IdlScopes.valueOf(value.replace(Glob.startScopeKeyword, ""))
+		return enumValue
+	}
+
+
+	fun popEndScopeThrowIfNot(): IdlScopes {
+		val (_, value) = popIfFirstStartsWithThrowIfNot(Glob.endScopeKeyword)
+		val enumValue = IdlScopes.valueOf(value.replace(Glob.endScopeKeyword, ""))
+
+		(enumValue == startedScopes.first())
+			.echt { startedScopes.removeFirst() }
+			.doch { throws() }
+
+		return enumValue
 	}
 
 

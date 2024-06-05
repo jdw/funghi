@@ -58,7 +58,7 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 	private fun step50InsertStartOfScopeKeywordAndEndOfScopeKeywordAtTheRightPlaces(data: String): String {
 		val ret = mutableListOf<String>()
 
-		var currentScope = ""
+		var currentScope: IdlScopes? = null
 		val lines = data.split("\n")
 		for (idx in lines.indices) {
 			val line = lines[idx].trim()
@@ -75,13 +75,13 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 			}
 
 			if (line.contains("interface")) {
-				currentScope = "interface"
+				currentScope = IdlScopes.INTERFACE
 				ret += "${IdlScopes.INTERFACE.startScopeKeyword()} $line"
 				continue
 			}
 
 			if (line.contains("dictionary")) {
-				currentScope = "dictionary"
+				currentScope = IdlScopes.DICTIONARY
 				ret += "${IdlScopes.DICTIONARY.startScopeKeyword()} $line"
 				continue
 			}
@@ -102,10 +102,10 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 			}
 
 			if (line.contains("};")) {
-				if ("" == currentScope) throws()
+				if (null == currentScope) throws()
 				ret += when (currentScope) {
-					"dictionary" -> IdlScopes.DICTIONARY.endScopeKeyword()
-					"interface" -> IdlScopes.INTERFACE.endScopeKeyword()
+					IdlScopes.DICTIONARY -> IdlScopes.DICTIONARY.endScopeKeyword()
+					IdlScopes.INTERFACE -> IdlScopes.INTERFACE.endScopeKeyword()
 					else -> throws()
 				}
 
