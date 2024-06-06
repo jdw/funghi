@@ -43,6 +43,10 @@ import com.github.jdw.funghi.fragments.builders.IdlInterfaceBuilder
  * @author Johannes Alexis Wirde
  */
 class IdlInterface(builder: IdlInterfaceBuilder): IdlFragment {
+	val isMixin = builder.isMixin
 	val type = IdlFragment.Type.INTERFACE
 	val name = builder.name!!
+	val operationConstructors = builder.operationConstructors.toSet().toTypedArray()
+	val operations = builder.operations.toSet().toTypedArray()
+	val attributes = builder.attributes.toSet().toTypedArray()
 }

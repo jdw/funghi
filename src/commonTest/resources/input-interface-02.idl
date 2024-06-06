@@ -1,0 +1,14 @@
+// This file tests "mixin" and partial interfaces and their attributes
+
+interface mixin A {
+	attribute double a;
+};
+
+partial interface B {
+	attribute A b;
+};
+
+partial interface B {
+	attribute Int32Array c;
+	attribute B c2;
+};

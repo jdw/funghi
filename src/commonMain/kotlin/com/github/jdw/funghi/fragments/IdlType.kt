@@ -12,6 +12,9 @@ import com.github.jdw.funghi.fragments.builders.IdlTypeBuilder
  * @author Johannes Alexis Wirde
  */
 class IdlType(builder: IdlTypeBuilder): IdlFragment {
+	val name = builder.name!!
+	val type = builder.type!!
+
 	enum class TYPE {
 		/**
 		 * The following types are known as integer types:

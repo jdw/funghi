@@ -125,7 +125,7 @@ class PiecesTest {
 			val pieces = Pieces(allKeywords)
 
 			(0..3).forEach { _ ->
-				val peekResult = pieces.peekIsPresentSingleType()
+				val peekResult = pieces.peekIsSingleType()
 				assert(peekResult)
 
 				val (popResult, value) = pieces.popIfPresentSingleTypeThrowIfNot()
@@ -158,7 +158,7 @@ class PiecesTest {
 				val pieces = Pieces(allKeywords)
 
 				(0..3).forEach { _ ->
-					val peekResult = pieces.peekIsPresentSingleType()
+					val peekResult = pieces.peekIsSingleType()
 					assert(peekResult)
 
 					val (popResult, value) = pieces.popIfPresentSingleTypeThrowIfNot()
@@ -196,7 +196,7 @@ class PiecesTest {
 				val pieces = Pieces(allKeywords)
 
 				(0..3).forEach { _ ->
-					val peekResult = pieces.peekIsPresentSingleType()
+					val peekResult = pieces.peekIsSingleType()
 					assert(peekResult)
 
 					val (popResult, value) = pieces.popIfPresentSingleTypeThrowIfNot()
@@ -236,7 +236,7 @@ class PiecesTest {
 					val pieces = Pieces(allKeywords)
 
 					(0..3).forEach { _ ->
-						val peekResult = pieces.peekIsPresentSingleType()
+						val peekResult = pieces.peekIsSingleType()
 						assert(peekResult)
 
 						val (popResult, value) = pieces.popIfPresentSingleTypeThrowIfNot()

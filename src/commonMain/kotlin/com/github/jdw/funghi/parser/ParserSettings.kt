@@ -26,7 +26,8 @@ enum class ParserSettings {
 		override fun argumentNameKeywords(): Set<String> = setOf("async", "attribute", "callback", "const", "constructor", "deleter", "dictionary", "enum", "getter", "includes", "inherit", "interface", "iterable", "maplike", "mixin", "namespace", "partial", "readonly", "required", "setlike", "setter", "static", "stringifier", "typedef", "unrestricted")
 		override fun complexTypesRegex(): Regex = "([a-zA-Z])+([a-zA-Z0-9_])*".toRegex()
 		override fun identifierReservedKeywords(): Set<String> = setOf("constructor", "toString")
-		override fun complexTypesNameIsProhibited(name: String): Boolean = identifierReservedKeywords().contains(name) || name.startsWith("_")
+		override fun identifierIsProhibited(name: String): Boolean = identifierReservedKeywords().contains(name) || name.startsWith("_")
+		override fun identifierRegex(): Regex = "([a-zA-Z])+([a-zA-Z0-9_])*".toRegex()
 		override fun nullableMarkers(): Set<String> = setOf("?")
 		override fun arrayMarkers(): Set<String> = setOf("[]")
 		override fun varargMarkers(): Set<String> = setOf("...")
@@ -52,7 +53,8 @@ enum class ParserSettings {
 	abstract fun argumentNameKeywords(): Set<String>
 	abstract fun complexTypesRegex(): Regex
 	abstract fun identifierReservedKeywords(): Set<String>
-	abstract fun complexTypesNameIsProhibited(name: String): Boolean
+	abstract fun identifierIsProhibited(name: String): Boolean
+	abstract fun identifierRegex(): Regex
 	abstract fun nullableMarkers(): Set<String>
 	abstract fun arrayMarkers(): Set<String>
 	abstract fun varargMarkers(): Set<String>

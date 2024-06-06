@@ -100,7 +100,10 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 			}
 
 			if (line.contains("attribute")) {
-				if (line.endsWith(";")) ret += "${IdlScope.ATTRIBUTE.startScopeKeyword()} ${line.replace("attribute", "")} ${IdlScope.ATTRIBUTE.endScopeKeyword()}"
+				val newLine = line
+					.replace("attribute", "")
+					.replace(";", "")
+				if (line.endsWith(";")) ret += "${IdlScope.ATTRIBUTE.startScopeKeyword()} $newLine ${IdlScope.ATTRIBUTE.endScopeKeyword()}"
 				else ret += "${IdlScope.ATTRIBUTE.startScopeKeyword()} $line"
 
 				continue

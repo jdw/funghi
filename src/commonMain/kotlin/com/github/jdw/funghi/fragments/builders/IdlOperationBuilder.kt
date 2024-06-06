@@ -16,7 +16,7 @@ class IdlOperationBuilder: IdlMemberBuilder() {
 		isUndefined = pieces popIfPresent "undefined"
 
 		if (!(isVoid || isUndefined)) {
-			if (pieces.peekIsPresentSingleType()) {
+			if (pieces.peekIsSingleType()) {
 				returnTypes += IdlType(IdlTypeBuilder().apply { thus parse pieces })
 			}
 			else {

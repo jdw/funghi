@@ -1,0 +1,14 @@
+// This file tests plain interfaces and their attributes
+
+interface A {
+	attribute double a;
+};
+
+interface B {
+	attribute A b;
+};
+
+interface C {
+	attribute Int32Array c;
+	attribute B c2;
+};

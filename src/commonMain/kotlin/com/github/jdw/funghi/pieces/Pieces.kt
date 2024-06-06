@@ -47,31 +47,6 @@ class Pieces(data: String) {
 	}
 
 
-	fun popStartScope(): IdlScope {
-		popUntilNotLineNumber()
-
-		val (_, value) = popIfFirstStartsWithThrowIfNot(Glob.startScopeKeyword)
-		val enumValue = IdlScope.valueOf(value.replace(Glob.startScopeKeyword, ""))
-		startedScopes.add(0, enumValue)
-
-		return enumValue
-	}
-
-
-	infix fun popStartScopeThrow(doThrow: Boolean): IdlScope {
-		popUntilNotLineNumber()
-
-		val (result, value) = popIfFirstStartsWith(Glob.startScopeKeyword)
-
-		result doch { doThrow echt { throws() } }
-
-		val enumValue = IdlScope.valueOf(value.replace(Glob.startScopeKeyword, ""))
-		startedScopes.add(0, enumValue)
-
-		return enumValue
-	}
-
-
 	infix fun peekStartScopeThrow(doThrow: Boolean): IdlScope {
 		popUntilNotLineNumber()
 
@@ -284,8 +259,7 @@ class Pieces(data: String) {
 	}
 
 
-	//TODO Test
-	fun peekIsPresentSingleType(): Boolean {
+	fun peekIsSingleType(): Boolean {
 		popUntilNotLineNumber()
 
 		if (pieces.size >= 3) {
@@ -385,5 +359,16 @@ class Pieces(data: String) {
 		ret.first doch { throws() }
 
 		return ret
+	}
+
+
+	fun popSingleType(): String {
+		popUntilNotLineNumber()
+
+		val ret = popIfPresentSingleType()
+
+		ret.first doch { throws() }
+
+		return ret.second
 	}
 }

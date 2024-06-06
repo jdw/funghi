@@ -1,7 +1,9 @@
 package com.github.jdw.funghi.fragments.builders
 
+import com.github.jdw.funghi.fragments.IdlScope.ATTRIBUTE
 import com.github.jdw.funghi.fragments.IdlType
 import com.github.jdw.funghi.pieces.Pieces
+import doch
 import echt
 
 class IdlAttributeBuilder: IdlMemberBuilder() {
@@ -11,10 +13,18 @@ class IdlAttributeBuilder: IdlMemberBuilder() {
 	val types = mutableListOf<IdlType>()
 
 	override fun parse(pieces: Pieces) {
+		pieces popStartScope ATTRIBUTE
 		isReadonly = pieces popIfPresent "readonly"
 		isUnrestricted = pieces popIfPresent "unrestricted"
-		(pieces.peekIsPresentSingleType()) echt { }
 
+		pieces.peekIsSingleType()
+			.echt {
+				types += IdlType(IdlTypeBuilder().apply { thus parse pieces })
+			}
+			.doch {
 
+			}
+
+		pieces popEndScope ATTRIBUTE
 	}
 }

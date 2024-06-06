@@ -10,7 +10,12 @@ import com.github.jdw.funghi.pieces.Pieces
  * * [The WebIDL spec](https://webidl.spec.whatwg.org/#idl-types)
  */
 class IdlTypeBuilder: IdlFragmentBuilder() {
+	var type: String? = null
+	var name: String? = null
+
+
 	override infix fun parse(pieces: Pieces) {
-		TODO("Not yet implemented")
+		type = pieces.popSingleType()
+		name = pieces pop Glob.parserSettings!!.identifierRegex()
 	}
 }
