@@ -10,8 +10,8 @@ object Glob {
 	val lineNumberKeyword = "${keywordStart}LINE_NUMBER_"
 	val emptyArrayKeyword = "${keywordStart}EMPTY_ARRAY"
 	val emptyDictionaryKeyword = "${keywordStart}EMPTY_DICTIONARY"
-	val startScopeKeyword = "${keywordStart}_START_SCOPE_"
-	val endScopeKeyword = "${keywordStart}_EMD_SCOPE_"
+	val startScopeKeyword = "${keywordStart}START_SCOPE_"
+	val endScopeKeyword = "${keywordStart}END_SCOPE_"
 	var lineNumber = ""
 	fun getLineNumber(): Int = lineNumber.replace(Glob.lineNumberKeyword, "").toInt()
 }

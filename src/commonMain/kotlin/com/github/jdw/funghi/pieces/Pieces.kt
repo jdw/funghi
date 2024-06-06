@@ -10,6 +10,7 @@ import removeNullableMarkers
 import throws
 
 class Pieces(data: String) {
+	private val thus = this
 	private val pieces = data.split(" ").toMutableList()
 	private val previousPieces = mutableListOf<String>()
 	private val startedScopes = mutableListOf<IdlScope>()
@@ -29,7 +30,7 @@ class Pieces(data: String) {
 		ret.add(pieces.first())
 		ret.add("<--- Current piece ---\n")
 		(1..11).forEach { idx ->
-			ret.add(pieces[idx])
+			if (idx < pieces.size) ret.add(pieces[idx])
 		}
 
 		return ret.joinToString(" ")
@@ -46,7 +47,7 @@ class Pieces(data: String) {
 	}
 
 
-	fun popStartScopeThrowIfNot(): IdlScope {
+	fun popStartScope(): IdlScope {
 		popUntilNotLineNumber()
 
 		val (_, value) = popIfFirstStartsWithThrowIfNot(Glob.startScopeKeyword)
@@ -84,6 +85,19 @@ class Pieces(data: String) {
 	}
 
 
+	fun peekStartScope(): IdlScope {
+		popUntilNotLineNumber()
+
+		val (result, value) = peekStartsWith(Glob.startScopeKeyword)
+
+		result doch { throws() }
+
+		val enumValue = IdlScope.valueOf(value.replace(Glob.startScopeKeyword, ""))
+
+		return enumValue
+	}
+
+
 	infix fun peekStartsWith(value: String): Pair<Boolean, String> {
 		popUntilNotLineNumber()
 
@@ -93,16 +107,35 @@ class Pieces(data: String) {
 			else Pair(false, first)
 	}
 
+
 	fun peek(): String {
 		popUntilNotLineNumber()
 
-		(pieces.isEmpty()) echt { throws() }
+		pieces.isEmpty() echt { throws() }
 
 		return pieces.first()
 	}
 
 
-	infix fun popStartScopeThrowIfNot(scope: IdlScope) {
+	infix fun peek(value: String): Boolean {
+		popUntilNotLineNumber()
+
+		pieces.isEmpty() echt { throws() }
+
+		return value == pieces.first()
+	}
+
+
+	infix fun peek(pattern: Regex): Boolean {
+		popUntilNotLineNumber()
+
+		pieces.isEmpty() echt { throws() }
+
+		return pieces.first() matches pattern
+	}
+
+
+	infix fun popStartScope(scope: IdlScope) {
 		popUntilNotLineNumber()
 
 		val (_, value) = popIfFirstStartsWithThrowIfNot(Glob.startScopeKeyword)
@@ -128,7 +161,7 @@ class Pieces(data: String) {
 	}
 
 
-	infix fun popEndScopeThrowIfNot(scope: IdlScope) {
+	infix fun popEndScope(scope: IdlScope) {
 		popUntilNotLineNumber()
 
 		val (_, value) = popIfFirstStartsWithThrowIfNot(Glob.endScopeKeyword)
@@ -168,15 +201,11 @@ class Pieces(data: String) {
 	}
 
 
-	infix fun popIfPresentThrowIfNot(value: Regex): String {
+	infix fun pop(pattern: Regex): String {
 		popUntilNotLineNumber()
 
-		return if (peek() matches value) {
-			pop()
-		}
-		else {
-			throws()
-		}
+		return if (peek() matches pattern) thus pop 1
+			else throws()
 	}
 
 
@@ -207,7 +236,7 @@ class Pieces(data: String) {
 	}
 
 
-	infix fun popIfPresentThrowIfNot(value: String) {
+	infix fun pop(value: String) {
 		popUntilNotLineNumber()
 
 		popIfPresent(value)
@@ -255,29 +284,38 @@ class Pieces(data: String) {
 	}
 
 
+	//TODO Test
 	fun peekIsPresentSingleType(): Boolean {
 		popUntilNotLineNumber()
 
-		val threePiece = pieces
-			.subList(0, 2)
-			.joinToString(" ")
-			.removeArrayMarkers()
-			.removeNullableMarkers()
-		if (Glob.parserSettings!!.allPredefinedTypesKeywords().contains(threePiece)) return true
+		if (pieces.size >= 3) {
+			val threePiece = pieces
+				.subList(0, 3)
+				.joinToString(" ")
+				.removeArrayMarkers()
+				.removeNullableMarkers()
+			if (Glob.parserSettings!!.allPredefinedTypesKeywords().contains(threePiece)) return true
+		}
 
-		val twoPiece = pieces
-			.subList(0, 1)
-			.joinToString(" ")
-			.removeArrayMarkers()
-			.removeNullableMarkers()
-		if (Glob.parserSettings!!.allPredefinedTypesKeywords().contains(twoPiece)) return true
+		if (pieces.size >= 2) {
+			val twoPiece = pieces
+				.subList(0, 2)
+				.joinToString(" ")
+				.removeArrayMarkers()
+				.removeNullableMarkers()
+			if (Glob.parserSettings!!.allPredefinedTypesKeywords().contains(twoPiece)) return true
+		}
 
-		val onePiece = peek()
-			.removeArrayMarkers()
-			.removeNullableMarkers()
-		if (Glob.parserSettings!!.allPredefinedTypesKeywords().contains(onePiece)) return true
+		if (pieces.isNotEmpty()) {
+			val onePiece = peek()
+				.removeArrayMarkers()
+				.removeNullableMarkers()
+			if (Glob.parserSettings!!.allPredefinedTypesKeywords().contains(onePiece)) return true
 
-		return Glob.parserSettings!!.complexTypesRegex() matches onePiece
+			return Glob.parserSettings!!.complexTypesRegex() matches onePiece
+		}
+
+		return false
 	}
 
 

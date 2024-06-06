@@ -24,14 +24,15 @@ enum class ParserSettings {
 				*bufferViewTypesKeywords().toTypedArray(),
 				*bufferSourceTypesKeywords().toTypedArray())
 		override fun argumentNameKeywords(): Set<String> = setOf("async", "attribute", "callback", "const", "constructor", "deleter", "dictionary", "enum", "getter", "includes", "inherit", "interface", "iterable", "maplike", "mixin", "namespace", "partial", "readonly", "required", "setlike", "setter", "static", "stringifier", "typedef", "unrestricted")
-		override fun complexTypesRegex(): Regex = "([a-zA-Z]).([a-zA-Z0-9_])*".toRegex()
+		override fun complexTypesRegex(): Regex = "([a-zA-Z])+([a-zA-Z0-9_])*".toRegex()
 		override fun identifierReservedKeywords(): Set<String> = setOf("constructor", "toString")
 		override fun complexTypesNameIsProhibited(name: String): Boolean = identifierReservedKeywords().contains(name) || name.startsWith("_")
 		override fun nullableMarkers(): Set<String> = setOf("?")
 		override fun arrayMarkers(): Set<String> = setOf("[]")
 		override fun varargMarkers(): Set<String> = setOf("...")
-		override fun operationRegex(): Regex = "[A-Za-z]+[a-zA-Z_0-9]*\\(.*\\)".toRegex()
+		override fun operationRegex(): Regex = "[A-Za-z]+[a-zA-Z_0-9]*\\(.*\\);".toRegex()
 		override fun constructorOperationDefinitionKeywords(): Set<String> = setOf("constructor")
+		override fun constructorOperationRegex(): Regex = "constructor\\(.*\\);".toRegex()
 		override fun attributeDefinitionKeywords(): Set<String> = setOf("attribute")
 	};
 
@@ -57,5 +58,6 @@ enum class ParserSettings {
 	abstract fun varargMarkers(): Set<String>
 	abstract fun operationRegex(): Regex
 	abstract fun constructorOperationDefinitionKeywords(): Set<String>
+	abstract fun constructorOperationRegex(): Regex
 	abstract fun attributeDefinitionKeywords(): Set<String>
 }

@@ -11,7 +11,8 @@ interface NameA {
 	undefined operationWithoutParameters();
 	double operationWithParameters(Path2D path, Element element);
 
-	readonly attribute (VideoTrack or AudioTrack or TextTrack)? track;
+	attribute DOMString nameC;
+	readonly attribute bigint track;
 	attribute ComplexType track;
 };
 
@@ -34,7 +35,7 @@ partial interface PartialNameA {
 
 	double operationWithParameters(Path2D path, Element element);
 
-	readonly attribute (VideoTrack or AudioTrack or TextTrack)? track;
+	readonly attribute VideoTrack? track;
 };
 
 // Willy-Wonka!

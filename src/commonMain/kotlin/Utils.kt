@@ -1,3 +1,5 @@
+import com.github.jdw.funghi.fragments.IdlMember
+
 internal class GeneralException(message: String = ""): Exception("\uD83E\uDEE1 (${Glob.filename}:${Glob.getLineNumber()}) ${Glob.pieces} $message")
 
 
@@ -83,3 +85,7 @@ fun String.containsNullableMarker(): Boolean {
 
 
 fun Set<String>.containsRemoveMarkers(value: String): Boolean = this.contains(value.removeArrayMarkers().removeNullableMarkers())
+
+infix fun MutableList<IdlMember>.add(value: IdlMember) {
+	this.add(value)
+}

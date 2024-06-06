@@ -1,0 +1,17 @@
+// Willy-Wonka!
+interface A {
+};
+
+/*Should be ignored*/
+
+interface/*test*/B {
+};
+
+interface/* test */C {
+};
+
+interface /*test*/ D {
+};
+
+interface /* test */ E {
+};

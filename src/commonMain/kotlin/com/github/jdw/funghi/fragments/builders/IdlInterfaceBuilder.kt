@@ -12,10 +12,9 @@ import com.github.jdw.funghi.fragments.IdlScope.OPERATION
 import com.github.jdw.funghi.fragments.IdlScope.OPERATION_CONSTRUCTOR
 import com.github.jdw.funghi.pieces.Pieces
 import genau
-import noop
-import throws
+import add
 
-class IdlInterfaceBuilder() : IdlFragmentBuilder {
+class IdlInterfaceBuilder() : IdlFragmentBuilder() {
 	var isMixin = false
 	var isPartial = false
 	var superTypes: MutableList<String>? = null
@@ -24,22 +23,22 @@ class IdlInterfaceBuilder() : IdlFragmentBuilder {
 	var extendedAttributes = mutableListOf<IdlExtendedAttribute>()
 
 	override fun parse(pieces: Pieces) {
-		pieces popStartScopeThrowIfNot INTERFACE
+		pieces popStartScope INTERFACE
 		isPartial = pieces popIfPresent "partial"
-		pieces popIfPresentThrowIfNot "interface"
+		pieces pop "interface"
 		isMixin = pieces popIfPresent "mixin"
-		name = pieces popIfPresentThrowIfNot Glob.parserSettings!!.complexTypesRegex()
-		pieces popIfPresentThrowIfNot "{"
+		name = pieces pop Glob.parserSettings!!.complexTypesRegex()
+		pieces pop "{"
 
 		while (pieces.peekIsStartScope()) {
-			when (pieces popStartScopeThrow genau) {
-				OPERATION_CONSTRUCTOR -> members += IdlOperationConstructor(IdlOperationConstructorBuilder().apply { parse(pieces) })
-				ATTRIBUTE -> members += IdlAttribute(IdlAttributeBuilder().apply { parse(pieces) })
-				OPERATION -> members += IdlOperation(IdlOperationBuilder().apply { parse(pieces) })
-				else -> throws()
+			when (pieces.peekStartScope()) {
+				OPERATION_CONSTRUCTOR -> members += IdlOperationConstructor(IdlOperationConstructorBuilder().apply { thus parse pieces })
+				ATTRIBUTE -> members add IdlAttribute(IdlAttributeBuilder().apply { thus parse pieces })
+				OPERATION -> members add IdlOperation(IdlOperationBuilder() apply { thus parse pieces })
+				else ->  thus throwing objection
 			}
 		}
 
-		pieces popEndScopeThrowIfNot INTERFACE
+		pieces popEndScope INTERFACE
 	}
 }

@@ -9,8 +9,8 @@ import com.github.jdw.funghi.pieces.Pieces
  * See further documentation:
  * * [The WebIDL spec](https://webidl.spec.whatwg.org/#idl-types)
  */
-class IdlTypeBuilder: IdlFragmentBuilder {
-	override fun parse(pieces: Pieces) {
+class IdlTypeBuilder: IdlFragmentBuilder() {
+	override infix fun parse(pieces: Pieces) {
 		TODO("Not yet implemented")
 	}
 }

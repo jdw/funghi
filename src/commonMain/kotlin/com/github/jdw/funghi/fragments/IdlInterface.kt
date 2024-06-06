@@ -45,8 +45,4 @@ import com.github.jdw.funghi.fragments.builders.IdlInterfaceBuilder
 class IdlInterface(builder: IdlInterfaceBuilder): IdlFragment {
 	val type = IdlFragment.Type.INTERFACE
 	val name = builder.name!!
-
-	init {
-		println("hej")
-	}
 }

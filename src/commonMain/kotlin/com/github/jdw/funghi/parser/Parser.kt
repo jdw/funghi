@@ -35,9 +35,7 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 		val builder = IdlModelBuilder()
 		var extendedAttribute: IdlExtendedAttribute? = null //TODO Should be list
 
-		pieces popStartScopeThrowIfNot IdlScope.MODEL
-
-		Glob.parserSettings!!.allPredefinedTypesKeywords().sorted().forEach { println(it) }
+		pieces popStartScope IdlScope.MODEL
 
 		while (pieces.peekIsStartScope()) {
 			when (pieces peekStartScopeThrow genau) {
@@ -45,14 +43,13 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 				IdlScope.TYPEDEF -> noop()
 				IdlScope.ENUM -> noop()
 				IdlScope.INTERFACE -> {
-					println("--- kaka")
 					builder.interfaces += IdlInterface(IdlInterfaceBuilder()
 						.apply {
 							(null != extendedAttribute)
 								.echt { extendedAttributes += extendedAttribute!! }
 								.echt { extendedAttribute = null }
 						}
-						.apply { parse(pieces) })
+						.apply { thus parse pieces })
 				}
 
 				IdlScope.EXTENDED_ATTRIBUTE -> {
@@ -63,7 +60,7 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 			}
 		}
 
-		pieces popEndScopeThrowIfNot IdlScope.MODEL
+		pieces popEndScope IdlScope.MODEL
 
 		return IdlModel(builder)
 	}
@@ -212,22 +209,25 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 		val ret = mutableListOf<String>()
 
 		var weAreInABlockComment = false
-		data.split(" ").forEach { piece ->
-			if (weAreInABlockComment) {
-				if (piece.contains("*/")) {
-					weAreInABlockComment = false
-					ret += piece.replace("*/", "")
+		data
+			.replace("/*", " /* ")
+			.replace("*/", " */ ")
+			.split(" ").forEach { piece ->
+				if (weAreInABlockComment) {
+					if (piece.contains("*/")) {
+						weAreInABlockComment = false
+						//ret += piece.replace("*/", "")
+					}
+				}
+				else {
+					if (piece.contains("/*")) {
+						weAreInABlockComment = true
+						//ret += piece.replace("/*", "")
+					}
+					else if (piece.contains("*/")) throw IllegalStateException("End of block comment found outside of block comment block!")
+					else ret += piece
 				}
 			}
-			else {
-				if (piece.contains("/*")) {
-					weAreInABlockComment = true
-					ret += piece.replace("/*", "")
-				}
-				else if (piece.contains("*/")) throw IllegalStateException("End of block comment found outside of block comment block!")
-				else ret += piece
-			}
-		}
 
 		return ret.joinToString(" ")
 	}
