@@ -51,4 +51,18 @@ class IdlInterface(builder: IdlInterfaceBuilder): IdlFragment {
 	val operationConstructors = builder.operationConstructors.toSet().toTypedArray()
 	val operations = builder.operations.toSet().toTypedArray()
 	val attributes = builder.attributes.toSet().toTypedArray()
+
+	override fun toString(): String {
+		var ret = "${if (isPartial) "partial " else ""}interface ${if (isMixin) "mixin " else ""}$name {\n"
+
+		operationConstructors.forEach { ret += "\t$it\n" }
+		if (operationConstructors.isNotEmpty()) ret += "\n"
+
+		operations.forEach { ret += "\t$it\n" }
+		if (operations.isNotEmpty()) ret += "\n"
+
+		attributes.forEach { ret += "\t$it\n" }
+
+		return "$ret};"
+	}
 }

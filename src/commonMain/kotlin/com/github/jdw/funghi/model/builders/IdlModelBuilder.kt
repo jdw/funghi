@@ -3,6 +3,7 @@ package com.github.jdw.funghi.model.builders
 import com.github.jdw.funghi.fragments.IdlDictionary
 import com.github.jdw.funghi.fragments.IdlEnum
 import com.github.jdw.funghi.fragments.IdlExtendedAttribute
+import com.github.jdw.funghi.fragments.IdlFragment
 import com.github.jdw.funghi.fragments.IdlInterface
 import com.github.jdw.funghi.pieces.Scope
 import com.github.jdw.funghi.fragments.IdlTypedef
@@ -18,6 +19,7 @@ class IdlModelBuilder {
 	val dictionaries = mutableListOf<IdlDictionary>()
 	val typedefs = mutableListOf<IdlTypedef>()
 	val enums = mutableListOf<IdlEnum>()
+	val fragments = mutableListOf<IdlFragment>()
 
 	infix fun puzzle(pieces: Pieces) {
 		var extendedAttribute: IdlExtendedAttribute? = null //TODO Should be list
@@ -40,6 +42,7 @@ class IdlModelBuilder {
 						.apply {
 							interfaces += this
 						}
+						.apply { fragments.add(IdlInterface(this)) }
 				}
 
 				Scope.EXTENDED_ATTRIBUTE -> {

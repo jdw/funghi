@@ -1,5 +1,3 @@
-// This file tests partial interfaces, interfaces and their attributes and constructors
-
 interface mixin A {
 	constructor();
 

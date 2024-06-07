@@ -91,6 +91,7 @@ class ParserTestInterfaces {
 
 	@Test
 	fun `Should manage to fully parse the file input-interfaces-03 dot idl`() {
+		// This file tests partial interfaces, interfaces and their attributes and constructors
 		val fileContent = this::class.java.classLoader.getResource("input-interface-03.idl")?.readText()!!
 		val model = Funghi().parse(fileContent, "input-interfaces-03.idl")
 
@@ -112,5 +113,18 @@ class ParserTestInterfaces {
 		assert(!b.isMixin)
 		assert(b.operationConstructors.size == 2)
 		assert(b.attributes.size == 3)
+	}
+
+
+	@Test
+	fun `Should manage to use IdlModel toString for testing`() {
+		val fileContent = this::class.java.classLoader.getResource("input-interface-03.idl")?.readText()!!
+		val model = Funghi().parse(fileContent, "input-interfaces-03.idl")
+
+		assert(fileContent == model.toString()) {
+			println(fileContent)
+			println("---")
+			println(model.toString())
+		}
 	}
 }

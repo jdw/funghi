@@ -21,5 +21,7 @@ class IdlModel(builder: IdlModelBuilder) {
 			emptyArray()
 		}
 
+	private val fragments = builder.fragments.toTypedArray()
 
+	override fun toString(): String = fragments.joinToString("\n\n")
 }
