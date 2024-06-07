@@ -1,6 +1,5 @@
 package com.github.jdw.funghi.pieces
 
-import com.github.jdw.funghi.fragments.IdlScope
 import doch
 import echt
 import genau
@@ -14,7 +13,7 @@ class Pieces(data: String) {
 	private val thus = this
 	private val pieces = data.split(" ").toMutableList()
 	private val previousPieces = mutableListOf<String>()
-	private val startedScopes = mutableListOf<IdlScope>()
+	private val startedScopes = mutableListOf<Scope>()
 
 	init {
 		popUntilNotLineNumber()
@@ -66,13 +65,13 @@ class Pieces(data: String) {
 	}
 
 
-	fun peekStartScope(): IdlScope {
+	fun peekStartScope(): Scope {
 		popUntilNotLineNumber()
 
 		pieces.first().startsWith(Glob.startScopeKeyword)
 			.doch { throws() }
 
-		val enumValue = IdlScope.valueOf(pieces.first().replace(Glob.startScopeKeyword, ""))
+		val enumValue = Scope.valueOf(pieces.first().replace(Glob.startScopeKeyword, ""))
 
 		return enumValue
 	}
@@ -164,12 +163,12 @@ class Pieces(data: String) {
 	}
 
 
-	infix fun popStartScope(scope: IdlScope) {
+	infix fun popStartScope(scope: Scope) {
 		popUntilNotLineNumber()
 
 		(pieces.first().startsWith(Glob.startScopeKeyword))
 			.echt {
-				val foundScope = IdlScope.valueOf(pieces.first().replace(Glob.startScopeKeyword, ""))
+				val foundScope = Scope.valueOf(pieces.first().replace(Glob.startScopeKeyword, ""))
 
 				(foundScope == scope)
 					.echt {
@@ -185,12 +184,12 @@ class Pieces(data: String) {
 	}
 
 
-	infix fun popEndScope(scope: IdlScope) {
+	infix fun popEndScope(scope: Scope) {
 		popUntilNotLineNumber()
 
 		(pieces.first().startsWith(Glob.endScopeKeyword))
 			.echt {
-				val value = IdlScope.valueOf(pieces.first().replace(Glob.endScopeKeyword, ""))
+				val value = Scope.valueOf(pieces.first().replace(Glob.endScopeKeyword, ""))
 				(value == startedScopes.first() && value == scope)
 					.echt { startedScopes.removeFirst() }
 					.echt { thus pop 1 }

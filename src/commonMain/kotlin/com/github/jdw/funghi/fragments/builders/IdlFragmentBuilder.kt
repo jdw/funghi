@@ -14,5 +14,5 @@ abstract class IdlFragmentBuilder {
 		throws(value)
 	}
 
-	abstract infix fun parse(pieces: Pieces)
+	abstract infix fun puzzle(pieces: Pieces)
 }

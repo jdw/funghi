@@ -5,10 +5,10 @@ import com.github.jdw.funghi.fragments.IdlAttribute
 import com.github.jdw.funghi.fragments.IdlExtendedAttribute
 import com.github.jdw.funghi.fragments.IdlOperation
 import com.github.jdw.funghi.fragments.IdlOperationConstructor
-import com.github.jdw.funghi.fragments.IdlScope.ATTRIBUTE
-import com.github.jdw.funghi.fragments.IdlScope.INTERFACE
-import com.github.jdw.funghi.fragments.IdlScope.OPERATION
-import com.github.jdw.funghi.fragments.IdlScope.OPERATION_CONSTRUCTOR
+import com.github.jdw.funghi.pieces.Scope.ATTRIBUTE
+import com.github.jdw.funghi.pieces.Scope.INTERFACE
+import com.github.jdw.funghi.pieces.Scope.OPERATION
+import com.github.jdw.funghi.pieces.Scope.OPERATION_CONSTRUCTOR
 import com.github.jdw.funghi.pieces.Pieces
 import throws
 
@@ -22,7 +22,7 @@ class IdlInterfaceBuilder() : IdlFragmentBuilder() {
 	val attributes: MutableSet<IdlAttribute> = mutableSetOf() //TODO Test uniqueness of names
 	var extendedAttributes = mutableListOf<IdlExtendedAttribute>()
 
-	override fun parse(pieces: Pieces) {
+	override fun puzzle(pieces: Pieces) {
 		pieces popStartScope INTERFACE
 		isPartial = pieces popIfPresent "partial"
 		pieces pop "interface"
@@ -32,9 +32,9 @@ class IdlInterfaceBuilder() : IdlFragmentBuilder() {
 
 		while (pieces.peekIsStartScope()) {
 			when (pieces.peekStartScope()) {
-				OPERATION_CONSTRUCTOR -> operationConstructors += IdlOperationConstructor(IdlOperationConstructorBuilder().apply { thus parse pieces })
-				ATTRIBUTE -> attributes += IdlAttribute(IdlAttributeBuilder().apply { thus parse pieces })
-				OPERATION -> operations += IdlOperation(IdlOperationBuilder() apply { thus parse pieces })
+				OPERATION_CONSTRUCTOR -> operationConstructors += IdlOperationConstructor(IdlOperationConstructorBuilder().apply { thus puzzle pieces })
+				ATTRIBUTE -> attributes += IdlAttribute(IdlAttributeBuilder().apply { thus puzzle pieces })
+				OPERATION -> operations += IdlOperation(IdlOperationBuilder() apply { thus puzzle pieces })
 				else -> thus throwing objection
 			}
 		}

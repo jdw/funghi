@@ -14,7 +14,7 @@ class IdlTypeBuilder: IdlFragmentBuilder() {
 	var isArray = false
 	var isNullable = false
 
-	override infix fun parse(pieces: Pieces) {
+	override infix fun puzzle(pieces: Pieces) {
 		name = pieces.popSingleType()
 	}
 }

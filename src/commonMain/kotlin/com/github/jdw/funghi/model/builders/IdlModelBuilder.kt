@@ -4,7 +4,7 @@ import com.github.jdw.funghi.fragments.IdlDictionary
 import com.github.jdw.funghi.fragments.IdlEnum
 import com.github.jdw.funghi.fragments.IdlExtendedAttribute
 import com.github.jdw.funghi.fragments.IdlInterface
-import com.github.jdw.funghi.fragments.IdlScope
+import com.github.jdw.funghi.pieces.Scope
 import com.github.jdw.funghi.fragments.IdlTypedef
 import com.github.jdw.funghi.fragments.builders.IdlExtendedAttributeBuilder
 import com.github.jdw.funghi.fragments.builders.IdlInterfaceBuilder
@@ -20,24 +20,24 @@ class IdlModelBuilder {
 	val typedefs = mutableListOf<IdlTypedef>()
 	val enums = mutableListOf<IdlEnum>()
 
-	infix fun parse(pieces: Pieces) {
+	infix fun puzzle(pieces: Pieces) {
 		var extendedAttribute: IdlExtendedAttribute? = null //TODO Should be list
 
-		pieces popStartScope IdlScope.MODEL
+		pieces popStartScope Scope.MODEL
 
 		while (pieces.peekIsStartScope()) {
 			when (pieces.peekStartScope()) {
-				IdlScope.DICTIONARY -> noop()
-				IdlScope.TYPEDEF -> noop()
-				IdlScope.ENUM -> noop()
-				IdlScope.INTERFACE -> {
+				Scope.DICTIONARY -> noop()
+				Scope.TYPEDEF -> noop()
+				Scope.ENUM -> noop()
+				Scope.INTERFACE -> {
 					IdlInterfaceBuilder()
 						.apply {
 							(null != extendedAttribute)
 								.echt { extendedAttributes += extendedAttribute!! }
 								.echt { extendedAttribute = null }
 						}
-						.apply { thus parse pieces }
+						.apply { thus puzzle pieces }
 						.apply {
 							if (this.isPartial) {
 								if (partialInterfaces.containsKey(this.name)) partialInterfaces[this.name]!!.fuse(this)
@@ -47,14 +47,16 @@ class IdlModelBuilder {
 						}
 				}
 
-				IdlScope.EXTENDED_ATTRIBUTE -> {
-					extendedAttribute = IdlExtendedAttribute(IdlExtendedAttributeBuilder().apply { parse(pieces) })
+				Scope.EXTENDED_ATTRIBUTE -> {
+					extendedAttribute = IdlExtendedAttribute(IdlExtendedAttributeBuilder().apply { puzzle(
+						pieces
+					) })
 				}
 
 				else -> throws()
 			}
 		}
 
-		pieces popEndScope IdlScope.MODEL
+		pieces popEndScope Scope.MODEL
 	}
 }

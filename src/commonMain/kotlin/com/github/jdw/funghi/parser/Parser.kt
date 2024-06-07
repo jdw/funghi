@@ -2,7 +2,7 @@ package com.github.jdw.funghi.parser
 
 
 import Glob
-import com.github.jdw.funghi.fragments.IdlScope
+import com.github.jdw.funghi.pieces.Scope
 import com.github.jdw.funghi.model.IdlModel
 import com.github.jdw.funghi.model.builders.IdlModelBuilder
 import com.github.jdw.funghi.pieces.Pieces
@@ -16,7 +16,7 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 
 		val pieces = data
 			.step05AddLineNumbers()
-			.step10Removelinecomments()
+			.step10RemoveLineComments()
 			.step20RemoveBlockComments()
 			.step25EmptyArrayAndEmptyDictionaryToKeywords()
 			.step30RemoveAllWhitespacesExceptSpaceChar()
@@ -26,7 +26,7 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 			.step65AddModelStartAndEndScope()
 			.step70ToPieces()
 
-		return IdlModel(IdlModelBuilder().apply { this parse pieces })
+		return IdlModel(IdlModelBuilder().apply { this puzzle pieces })
 	}
 
 
@@ -45,7 +45,7 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 	}
 
 
-	private fun String.step10Removelinecomments(): String {
+	private fun String.step10RemoveLineComments(): String {
 		val ret = mutableListOf<String>()
 
 		this
@@ -126,12 +126,13 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 	private fun String.step50InsertStartOfScopeKeywordAndEndOfScopeKeywordAtTheRightPlaces(): String {
 		val ret = mutableListOf<String>()
 
-		var currentScope: IdlScope? = null
+		var currentScope: Scope? = null
 		val lines = this.split("\n")
 		for (idx in lines.indices) {
 			val line = lines[idx].trim()
 			if (line.contains("[") && line.contains("]")) {
-				ret += "${IdlScope.EXTENDED_ATTRIBUTE.startScopeKeyword()} $line ${IdlScope.EXTENDED_ATTRIBUTE.endScopeKeyword()}"
+				ret += "${Scope.EXTENDED_ATTRIBUTE.startScopeKeyword()} $line ${Scope.EXTENDED_ATTRIBUTE.endScopeKeyword()}"
+
 				continue
 			}
 
@@ -139,31 +140,35 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 				val newLine = line
 					//.replace("attribute", "")
 					.replace(";", " ;")
-				if (line.endsWith(";")) ret += "${IdlScope.ATTRIBUTE.startScopeKeyword()} $newLine ${IdlScope.ATTRIBUTE.endScopeKeyword()}"
-				else ret += "${IdlScope.ATTRIBUTE.startScopeKeyword()} $line"
+				if (line.endsWith(";")) ret += "${Scope.ATTRIBUTE.startScopeKeyword()} $newLine ${Scope.ATTRIBUTE.endScopeKeyword()}"
+				else ret += "${Scope.ATTRIBUTE.startScopeKeyword()} $line"
 
 				continue
 			}
 
 			if (line.contains("interface")) {
-				currentScope = IdlScope.INTERFACE
-				ret += "${IdlScope.INTERFACE.startScopeKeyword()} $line"
+				currentScope = Scope.INTERFACE
+				ret += "${Scope.INTERFACE.startScopeKeyword()} $line"
+
 				continue
 			}
 
 			if (line.contains("dictionary")) {
-				currentScope = IdlScope.DICTIONARY
-				ret += "${IdlScope.DICTIONARY.startScopeKeyword()} $line"
+				currentScope = Scope.DICTIONARY
+				ret += "${Scope.DICTIONARY.startScopeKeyword()} $line"
+
 				continue
 			}
 
 			if (line.contains("enum")) {
-				ret += "${IdlScope.ENUM.startScopeKeyword()} $line ${IdlScope.ENUM.endScopeKeyword()}"
+				ret += "${Scope.ENUM.startScopeKeyword()} $line ${Scope.ENUM.endScopeKeyword()}"
+
 				continue
 			}
 
 			if (line.contains("typedef")) {
-				ret += "${IdlScope.TYPEDEF.startScopeKeyword()} $line ${IdlScope.TYPEDEF.endScopeKeyword()}"
+				ret += "${Scope.TYPEDEF.startScopeKeyword()} $line ${Scope.TYPEDEF.endScopeKeyword()}"
+
 				continue
 			}
 
@@ -171,21 +176,20 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 				val newLine = if (line.contains("constructor();")) line // No arguments!
 					.replace("constructor();", "constructor ( );")
 				else line
-					.replace("constructor(", "constructor ( ${IdlScope.ARGUMENT.startScopeKeyword()} ")
-					.replace(");", " ${IdlScope.ARGUMENT.endScopeKeyword()} );")
-					.replace(",", " ${IdlScope.ARGUMENT.endScopeKeyword()} , ${IdlScope.ARGUMENT.startScopeKeyword()} ")
+					.replace("constructor(", "constructor ( ${Scope.ARGUMENT.startScopeKeyword()} ")
+					.replace(");", " ${Scope.ARGUMENT.endScopeKeyword()} );")
+					.replace(",", " ${Scope.ARGUMENT.endScopeKeyword()} , ${Scope.ARGUMENT.startScopeKeyword()} ")
 
-				val newValue = "${IdlScope.OPERATION_CONSTRUCTOR.startScopeKeyword()} $newLine ${IdlScope.OPERATION_CONSTRUCTOR.endScopeKeyword()}"
+				ret += "${Scope.OPERATION_CONSTRUCTOR.startScopeKeyword()} $newLine ${Scope.OPERATION_CONSTRUCTOR.endScopeKeyword()}"
 
-				ret += newValue
 				continue
 			}
 
 			if (line.contains("};")) {
 				if (null == currentScope) throws()
 				ret += when (currentScope) {
-					IdlScope.DICTIONARY -> IdlScope.DICTIONARY.endScopeKeyword()
-					IdlScope.INTERFACE -> IdlScope.INTERFACE.endScopeKeyword()
+					Scope.DICTIONARY -> Scope.DICTIONARY.endScopeKeyword()
+					Scope.INTERFACE -> Scope.INTERFACE.endScopeKeyword()
 					else -> throws()
 				}
 
@@ -198,7 +202,8 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 				//.replace(")", " )")
 				//.replace(");", " );")
 				//.replace(",", " ,")
-				ret += "${IdlScope.OPERATION.startScopeKeyword()} $newLine ${IdlScope.OPERATION.endScopeKeyword()}"
+				ret += "${Scope.OPERATION.startScopeKeyword()} $newLine ${Scope.OPERATION.endScopeKeyword()}"
+
 				continue
 			}
 
@@ -216,23 +221,26 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 					//.replace(")", " )")
 					//.replace(");", " );")
 					//.replace(",", " ,")
-					ret += "${IdlScope.OPERATION.startScopeKeyword()} $newLine ${IdlScope.OPERATION.endScopeKeyword()}"
+					ret += "${Scope.OPERATION.startScopeKeyword()} $newLine ${Scope.OPERATION.endScopeKeyword()}"
+
 					continue
 				}
 			}
 
 			if (line.contains("=")) {
-				if (line.contains("const")) ret += "${IdlScope.CONST_ATTRIBUTE.startScopeKeyword()} $line ${IdlScope.CONST_ATTRIBUTE.endScopeKeyword()}"
-				else ret += "${IdlScope.DICTIONARY_MEMBER.startScopeKeyword()} $line ${IdlScope.DICTIONARY_MEMBER.endScopeKeyword()}"
+				if (line.contains("const")) ret += "${Scope.CONST_ATTRIBUTE.startScopeKeyword()} $line ${Scope.CONST_ATTRIBUTE.endScopeKeyword()}"
+				else ret += "${Scope.DICTIONARY_MEMBER.startScopeKeyword()} $line ${Scope.DICTIONARY_MEMBER.endScopeKeyword()}"
+
 				continue
 			}
 
 			if (line.contains("includes")) {
-				ret += "${IdlScope.INCLUDES.startScopeKeyword()} $line ${IdlScope.INCLUDES.endScopeKeyword()}"
+				ret += "${Scope.INCLUDES.startScopeKeyword()} $line ${Scope.INCLUDES.endScopeKeyword()}"
+
 				continue
 			}
 
-			if (line.endsWith(";")) ret += "$line ${IdlScope.ATTRIBUTE.endScopeKeyword()}"
+			if (line.endsWith(";")) ret += "$line ${Scope.ATTRIBUTE.endScopeKeyword()}"
 			else ret += line
 		}
 
@@ -246,7 +254,7 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 	}
 
 
-	private fun String.step65AddModelStartAndEndScope(): String = "${IdlScope.MODEL.startScopeKeyword()} $this ${IdlScope.MODEL.endScopeKeyword()}"
+	private fun String.step65AddModelStartAndEndScope(): String = "${Scope.MODEL.startScopeKeyword()} $this ${Scope.MODEL.endScopeKeyword()}"
 
 
 	private fun String.step70ToPieces(): Pieces = Pieces(this).apply { Glob.pieces = this }

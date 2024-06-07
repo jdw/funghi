@@ -1,6 +1,6 @@
-package com.github.jdw.funghi.fragments
+package com.github.jdw.funghi.pieces
 
-enum class IdlScope {
+enum class Scope {
 	TYPEDEF,
 	DICTIONARY,
 	INTERFACE,

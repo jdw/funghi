@@ -1,6 +1,6 @@
 package com.github.jdw.funghi.fragments.builders
 
-import com.github.jdw.funghi.fragments.IdlScope.OPERATION
+import com.github.jdw.funghi.pieces.Scope.OPERATION
 import com.github.jdw.funghi.fragments.IdlType
 import com.github.jdw.funghi.pieces.Pieces
 
@@ -9,7 +9,7 @@ class IdlOperationBuilder: IdlMemberBuilder() {
 	var isUndefined: Boolean = false
 	var name: String? = null
 	val returnTypes = mutableListOf<IdlType>()
-	override fun parse(pieces: Pieces) {
+	override fun puzzle(pieces: Pieces) {
 		pieces popStartScope OPERATION
 
 		isVoid = pieces popIfPresent "void"
@@ -17,7 +17,7 @@ class IdlOperationBuilder: IdlMemberBuilder() {
 
 		if (!(isVoid || isUndefined)) {
 			if (pieces.peekIsSingleType()) {
-				returnTypes += IdlType(IdlTypeBuilder().apply { thus parse pieces })
+				returnTypes += IdlType(IdlTypeBuilder().apply { thus puzzle pieces })
 			}
 			else {
 				//TODO multi-type type val value = pieces.pop
