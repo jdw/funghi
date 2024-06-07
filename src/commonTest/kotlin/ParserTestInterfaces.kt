@@ -89,26 +89,26 @@ class ParserTestInterfaces {
 	}
 
 
-//	@Test
-//	fun `Should manage to fully parse the file input-interfaces-03 dot idl`() {
-//		val fileContent = this::class.java.classLoader.getResource("input-interface-03.idl")?.readText()!!
-//		val model = Funghi().parse(fileContent, "input-interfaces-03.idl")
-//
-//		val sortedInterfaces = model.interfaces.sortedBy { it.name }
-//		assert(sortedInterfaces.map { it.name }.joinToString(" ") == "A B")
-//
-//		val a = sortedInterfaces[0]
-//		assert(a.name == "A")
-//		assert(a.isMixin)
-//		assert(a.operationConstructors.size == 1)
-//		assert(a.operationConstructors.toList()[0].arguments.isEmpty())
-//		assert(a.attributes.size == 1)
-//		//assert(a.operationConstructors[0].parameters.size == 0)
-//
-//		val b = sortedInterfaces[1]
-//		assert(b.name == "B")
-//		assert(!b.isMixin)
-//		assert(b.operationConstructors.size == 2)
-//		assert(b.attributes.size == 3)
-//	}
+	@Test
+	fun `Should manage to fully parse the file input-interfaces-03 dot idl`() {
+		val fileContent = this::class.java.classLoader.getResource("input-interface-03.idl")?.readText()!!
+		val model = Funghi().parse(fileContent, "input-interfaces-03.idl")
+
+		val sortedInterfaces = model.interfaces.sortedBy { it.name }
+		assert(sortedInterfaces.map { it.name }.joinToString(" ") == "A B")
+
+		val a = sortedInterfaces[0]
+		assert(a.name == "A")
+		assert(a.isMixin)
+		assert(a.operationConstructors.size == 1)
+		assert(a.operationConstructors.toList()[0].arguments.isEmpty())
+		assert(a.attributes.size == 1)
+		//assert(a.operationConstructors[0].parameters.size == 0)
+
+		val b = sortedInterfaces[1]
+		assert(b.name == "B")
+		assert(!b.isMixin)
+		assert(b.operationConstructors.size == 2)
+		assert(b.attributes.size == 3)
+	}
 }

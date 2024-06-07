@@ -16,6 +16,7 @@ class IdlOperationConstructorBuilder: IdlMemberBuilder() {
 
 		while (pieces.peekIsStartScope()) {
 			arguments += IdlArgument(IdlArgumentBuilder().apply { thus parse pieces })
+			pieces popIfPresent ","
 		}
 
 		pieces pop ");"

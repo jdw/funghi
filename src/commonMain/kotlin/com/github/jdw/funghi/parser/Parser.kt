@@ -35,7 +35,6 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 		val builder = IdlModelBuilder()
 		var extendedAttribute: IdlExtendedAttribute? = null //TODO Should be list
 
-		//pieces.printAll()
 		pieces popStartScope IdlScope.MODEL
 
 		while (pieces.peekIsStartScope()) {

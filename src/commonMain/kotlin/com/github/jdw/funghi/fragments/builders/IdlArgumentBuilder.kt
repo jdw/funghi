@@ -16,8 +16,7 @@ class IdlArgumentBuilder: IdlFragmentBuilder() {
 
 		types += IdlType(IdlTypeBuilder().apply { thus parse pieces })
 
-		name = ""//pieces pop Glob.parserSettings!!.identifierRegex()
-		pieces pop 1
+		name = pieces pop Glob.parserSettings!!.identifierRegex()
 
 		pieces popEndScope ARGUMENT
 	}
