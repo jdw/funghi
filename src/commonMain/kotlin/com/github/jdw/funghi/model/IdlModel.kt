@@ -1,6 +1,7 @@
 package com.github.jdw.funghi.model
 
 import com.github.jdw.funghi.fragments.IdlInterface
+import com.github.jdw.funghi.fragments.builders.IdlInterfaceBuilder
 import com.github.jdw.funghi.model.builders.IdlModelBuilder
 
 class IdlModel(builder: IdlModelBuilder) {
@@ -8,17 +9,17 @@ class IdlModel(builder: IdlModelBuilder) {
 	fun isErrorFree(): Boolean = errors.isEmpty()
 
 	val interfaces =
-		if (builder.partialInterfaces.isNotEmpty() || builder.interfaces.isNotEmpty()) {
-			val ret = mutableListOf<IdlInterface>()
-			ret.addAll(builder.interfaces)
-			builder
-				.partialInterfaces
-				.forEach { (_, interfaze) ->
-					ret += IdlInterface(interfaze)
-				}
-			ret.toSet().toTypedArray()
+		if (builder.interfaces.isNotEmpty()) {
+			val tmp = mutableMapOf<String, IdlInterfaceBuilder>()
+
+			builder.interfaces.forEach { if (!it.isPartial) tmp[it.name!!] = it }
+			builder.interfaces.forEach { if (it.isPartial) tmp[it.name!!]!!.fuse(it) }
+
+			tmp.values.map { IdlInterface(it) }.toTypedArray()
 		}
 		else {
 			emptyArray()
 		}
+
+
 }

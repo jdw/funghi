@@ -6,7 +6,7 @@ interface mixin A {
 	attribute double a;
 };
 
-partial interface B {
+interface B {
 	constructor();
 
 	attribute A b;

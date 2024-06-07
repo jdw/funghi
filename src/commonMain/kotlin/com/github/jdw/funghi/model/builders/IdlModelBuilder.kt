@@ -14,8 +14,7 @@ import noop
 import throws
 
 class IdlModelBuilder {
-	val interfaces = mutableListOf<IdlInterface>()
-	val partialInterfaces = mutableMapOf<String, IdlInterfaceBuilder>()
+	val interfaces = mutableListOf<IdlInterfaceBuilder>()
 	val dictionaries = mutableListOf<IdlDictionary>()
 	val typedefs = mutableListOf<IdlTypedef>()
 	val enums = mutableListOf<IdlEnum>()
@@ -39,11 +38,7 @@ class IdlModelBuilder {
 						}
 						.apply { thus puzzle pieces }
 						.apply {
-							if (this.isPartial) {
-								if (partialInterfaces.containsKey(this.name)) partialInterfaces[this.name]!!.fuse(this)
-								else partialInterfaces[this.name!!] = this
-							}
-							else interfaces += IdlInterface(this)
+							interfaces += this
 						}
 				}
 

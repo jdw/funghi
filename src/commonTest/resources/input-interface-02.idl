@@ -4,7 +4,7 @@ interface mixin A {
 	attribute double a;
 };
 
-partial interface B {
+interface B {
 	attribute A b;
 };
 

@@ -47,7 +47,7 @@ class IdlInterfaceBuilder() : IdlFragmentBuilder() {
 
 	fun fuse(other: IdlInterfaceBuilder) {
 		if (isMixin != other.isMixin) throws()
-		if (isPartial != other.isPartial && isPartial) throws()
+		if (!other.isPartial) throws()
 		if (name != other.name) throws("this.name" to name!!
 			, "other.name" to other.name!!)
 

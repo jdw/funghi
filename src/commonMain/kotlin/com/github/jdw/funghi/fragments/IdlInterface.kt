@@ -46,6 +46,8 @@ class IdlInterface(builder: IdlInterfaceBuilder): IdlFragment {
 	val isMixin = builder.isMixin
 	val type = IdlFragment.Type.INTERFACE
 	val name = builder.name!!
+	val isPartial = builder.isPartial
+
 	val operationConstructors = builder.operationConstructors.toSet().toTypedArray()
 	val operations = builder.operations.toSet().toTypedArray()
 	val attributes = builder.attributes.toSet().toTypedArray()

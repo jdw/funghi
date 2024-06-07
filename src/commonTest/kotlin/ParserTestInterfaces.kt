@@ -95,7 +95,9 @@ class ParserTestInterfaces {
 		val model = Funghi().parse(fileContent, "input-interfaces-03.idl")
 
 		val sortedInterfaces = model.interfaces.sortedBy { it.name }
-		assert(sortedInterfaces.map { it.name }.joinToString(" ") == "A B")
+		assert(sortedInterfaces.map { it.name }.joinToString(" ") == "A B") {
+			println(sortedInterfaces.map { it.name }.joinToString(" ") )
+		}
 
 		val a = sortedInterfaces[0]
 		assert(a.name == "A")
