@@ -17,11 +17,11 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 		val pieces = data
 			.step05AddLineNumbers()
 			.step10Removelinecomments()
-			.step20Removeblockcomments()
-			.step25Emptyarrayandemptydictionarytokeywords()
-			.step30Removeallwhitespacesexceptonespace()
-			.step40Insertnewlineattherightplaces()
-			.step50Insertstartofscopekeywordandendofscopekeywordattherightplaces()
+			.step20RemoveBlockComments()
+			.step25EmptyArrayAndEmptyDictionaryToKeywords()
+			.step30RemoveAllWhitespacesExceptSpaceChar()
+			.step40InsertNewLineAtTheRightPlaces()
+			.step50InsertStartOfScopeKeywordAndEndOfScopeKeywordAtTheRightPlaces()
 			.step60TrimPieces()
 			.step65AddModelStartAndEndScope()
 			.step70ToPieces()
@@ -59,7 +59,7 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 	}
 
 
-	private fun String.step20Removeblockcomments(): String {
+	private fun String.step20RemoveBlockComments(): String {
 		val ret = mutableListOf<String>()
 
 		var weAreInABlockComment = false
@@ -87,7 +87,7 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 	}
 
 
-	private fun String.step25Emptyarrayandemptydictionarytokeywords(): String {
+	private fun String.step25EmptyArrayAndEmptyDictionaryToKeywords(): String {
 		return this
 			.replace("= [],", "= ${Glob.emptyArrayKeyword} ,")
 			.replace("= {},", "= ${Glob.emptyDictionaryKeyword} ,")
@@ -99,7 +99,7 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 	}
 
 
-	private fun String.step30Removeallwhitespacesexceptonespace(): String {
+	private fun String.step30RemoveAllWhitespacesExceptSpaceChar(): String {
 		val ret = mutableListOf<String>()
 
 		this
@@ -114,7 +114,7 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 	}
 
 
-	private fun String.step40Insertnewlineattherightplaces(): String {
+	private fun String.step40InsertNewLineAtTheRightPlaces(): String {
 		return this
 			.replace("[", "\n[")
 			.replace("]", "]\n")
@@ -123,7 +123,7 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 	}
 
 
-	private fun String.step50Insertstartofscopekeywordandendofscopekeywordattherightplaces(): String {
+	private fun String.step50InsertStartOfScopeKeywordAndEndOfScopeKeywordAtTheRightPlaces(): String {
 		val ret = mutableListOf<String>()
 
 		var currentScope: IdlScope? = null
