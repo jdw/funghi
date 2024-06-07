@@ -9,30 +9,31 @@ import com.github.jdw.funghi.pieces.Pieces
 import throws
 
 
-internal class Parser(val settings: ParserSettings, val filename: String) {
+internal class Parser(val settings: ParserSettings, private val filename: String) {
 	infix fun parse(data: String): IdlModel {
 		Glob.parserSettings = settings
 		Glob.filename = filename
 
-		val data05 = step05AddLineNumbers(data)
-		val data10 = step10RemoveLineComments(data05)
-		val data20 = step20RemoveBlockComments(data10)
-		val data25 = step25EmptyArrayAndEmptyDictionaryToKeywords(data20);
-		val data30 = step30RemoveAllWhiteSpacesExceptOneSpace(data25)
-		val data40 = step40InsertNewlineAtTheRightPlaces(data30)
-		val data50 = step50InsertStartOfScopeKeywordAndEndOfScopeKeywordAtTheRightPlaces(data40)
-		val data60 = step60TrimPieces(data50)
-		val data65 = step65AddModelStartAndEndScope(data60)
-		val pieces = step70ToPieces(data65)
+		val pieces = data
+			.step05AddLineNumbers()
+			.step10Removelinecomments()
+			.step20Removeblockcomments()
+			.step25Emptyarrayandemptydictionarytokeywords()
+			.step30Removeallwhitespacesexceptonespace()
+			.step40Insertnewlineattherightplaces()
+			.step50Insertstartofscopekeywordandendofscopekeywordattherightplaces()
+			.step60TrimPieces()
+			.step65AddModelStartAndEndScope()
+			.step70ToPieces()
 
 		return IdlModel(IdlModelBuilder().apply { this parse pieces })
 	}
 
 
-	private fun step05AddLineNumbers(data: String): String {
+	private fun String.step05AddLineNumbers(): String {
 		val ret = mutableListOf<String>()
 		var lineNumber = 1
-		data
+		this
 			.split("\n")
 			.forEach { lineRaw ->
 				val line = lineRaw.trim()
@@ -44,10 +45,10 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 	}
 
 
-	private fun step10RemoveLineComments(data: String): String {
+	private fun String.step10Removelinecomments(): String {
 		val ret = mutableListOf<String>()
 
-		data
+		this
 			.split("\n")
 			.forEach { line ->
 				ret += if (line.contains("//")) line.split("//").first()
@@ -58,11 +59,11 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 	}
 
 
-	private fun step20RemoveBlockComments(data: String): String {
+	private fun String.step20Removeblockcomments(): String {
 		val ret = mutableListOf<String>()
 
 		var weAreInABlockComment = false
-		data
+		this
 			.replace("/*", " /* ")
 			.replace("*/", " */ ")
 			.split(" ").forEach { piece ->
@@ -86,8 +87,8 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 	}
 
 
-	private fun step25EmptyArrayAndEmptyDictionaryToKeywords(data: String): String {
-		return data
+	private fun String.step25Emptyarrayandemptydictionarytokeywords(): String {
+		return this
 			.replace("= [],", "= ${Glob.emptyArrayKeyword} ,")
 			.replace("= {},", "= ${Glob.emptyDictionaryKeyword} ,")
 			.replace("= [];", "= ${Glob.emptyArrayKeyword} ;")
@@ -98,10 +99,10 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 	}
 
 
-	private fun step30RemoveAllWhiteSpacesExceptOneSpace(data: String): String {
+	private fun String.step30Removeallwhitespacesexceptonespace(): String {
 		val ret = mutableListOf<String>()
 
-		data
+		this
 			.split(" ")
 			.forEach { line ->
 				line
@@ -113,8 +114,8 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 	}
 
 
-	private fun step40InsertNewlineAtTheRightPlaces(data: String): String {
-		return data
+	private fun String.step40Insertnewlineattherightplaces(): String {
+		return this
 			.replace("[", "\n[")
 			.replace("]", "]\n")
 			.replace(";", ";\n")
@@ -122,11 +123,11 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 	}
 
 
-	private fun step50InsertStartOfScopeKeywordAndEndOfScopeKeywordAtTheRightPlaces(data: String): String {
+	private fun String.step50Insertstartofscopekeywordandendofscopekeywordattherightplaces(): String {
 		val ret = mutableListOf<String>()
 
 		var currentScope: IdlScope? = null
-		val lines = data.split("\n")
+		val lines = this.split("\n")
 		for (idx in lines.indices) {
 			val line = lines[idx].trim()
 			if (line.contains("[") && line.contains("]")) {
@@ -239,11 +240,14 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 	}
 
 
-	private fun step60TrimPieces(data: String): String = mutableListOf<String>().apply { data.split(" ").forEach { piece -> if (piece.isNotEmpty() && piece.isNotBlank()) add(piece.trim().replace("\n", " "))} }.joinToString(" ")
+	private fun String.step60TrimPieces(): String {
+		val data = this
+		return mutableListOf<String>().apply { data.split(" ").forEach { piece -> if (piece.isNotEmpty() && piece.isNotBlank()) add(piece.trim().replace("\n", " "))} }.joinToString(" ")
+	}
 
 
-	private fun step65AddModelStartAndEndScope(data: String): String = "${IdlScope.MODEL.startScopeKeyword()} $data ${IdlScope.MODEL.endScopeKeyword()}"
+	private fun String.step65AddModelStartAndEndScope(): String = "${IdlScope.MODEL.startScopeKeyword()} $this ${IdlScope.MODEL.endScopeKeyword()}"
 
 
-	private fun step70ToPieces(data: String): Pieces = Pieces(data).apply { Glob.pieces = this }
+	private fun String.step70ToPieces(): Pieces = Pieces(this).apply { Glob.pieces = this }
 }
