@@ -27,4 +27,4 @@ infix fun Boolean.doch(block: () -> Unit): Boolean {
 }
 
 val genau = true
-val nein = true
+val nein = false

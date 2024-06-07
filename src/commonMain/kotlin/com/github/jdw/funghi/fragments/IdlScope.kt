@@ -13,7 +13,8 @@ enum class IdlScope {
 	DICTIONARY_MEMBER,
 	EXTENDED_ATTRIBUTE,
 	MULTI_TYPE,
-	MODEL;
+	MODEL,
+	ARGUMENT;
 
 	fun startScopeKeyword(): String = "${Glob.startScopeKeyword}$name"
 	fun endScopeKeyword(): String = "${Glob.endScopeKeyword}$name"

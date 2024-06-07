@@ -200,14 +200,14 @@ class PiecesTest {
 					assert(peekResult)
 
 					val (popResult, value) = pieces.popIfPresentSingleTypeThrowIfNot()
-					assert(popResult && allKeywords.contains(value) && value.containsArrayMarker()) {
+					assert(popResult && allKeywords.contains(value) && value.containsNullableMarker()) {
 						println(allKeywords)
 						println()
 						println("'$value' was missing!")
 						println()
-						println(popResult)
+						println("popResult: $popResult")
 						println()
-						println(value.containsArrayMarker())
+						println("array marker: ${value.containsNullableMarker()}")
 					}
 				}
 			}

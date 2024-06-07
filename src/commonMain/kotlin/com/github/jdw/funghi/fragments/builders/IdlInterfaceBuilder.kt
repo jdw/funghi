@@ -10,6 +10,7 @@ import com.github.jdw.funghi.fragments.IdlScope.INTERFACE
 import com.github.jdw.funghi.fragments.IdlScope.OPERATION
 import com.github.jdw.funghi.fragments.IdlScope.OPERATION_CONSTRUCTOR
 import com.github.jdw.funghi.pieces.Pieces
+import throws
 
 class IdlInterfaceBuilder() : IdlFragmentBuilder() {
 	var isMixin = false
@@ -38,6 +39,21 @@ class IdlInterfaceBuilder() : IdlFragmentBuilder() {
 			}
 		}
 
+		//TODO pieces pop "};"?
+
 		pieces popEndScope INTERFACE
+	}
+
+
+	fun fuse(other: IdlInterfaceBuilder) {
+		if (isMixin != other.isMixin) throws()
+		if (isPartial != other.isPartial && isPartial) throws()
+		if (name != other.name) throws("this.name" to name!!
+			, "other.name" to other.name!!)
+
+		extendedAttributes.addAll(other.extendedAttributes)
+		operations.addAll(other.operations)
+		operationConstructors.addAll(other.operationConstructors)
+		attributes.addAll(other.attributes)
 	}
 }

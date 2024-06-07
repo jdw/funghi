@@ -1,6 +1,7 @@
 package com.github.jdw.funghi.fragments
 
 import com.github.jdw.funghi.fragments.builders.IdlTypeBuilder
+import echt
 
 /**
  * This section lists the types supported by Web IDL, the set of values or Infra
@@ -13,7 +14,16 @@ import com.github.jdw.funghi.fragments.builders.IdlTypeBuilder
  */
 class IdlType(builder: IdlTypeBuilder): IdlFragment {
 	val name = builder.name!!
-	val type = builder.type!!
+	val isArray = builder.isArray
+	val isNullable = builder.isNullable
+
+	override fun toString(): String {
+		var ret = name
+		isArray echt { ret += "[]" }
+		isNullable echt { ret += "?" }
+
+		return ret
+	}
 
 	enum class TYPE {
 		/**

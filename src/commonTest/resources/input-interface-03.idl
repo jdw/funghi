@@ -1,0 +1,20 @@
+// This file tests partial interfaces, interfaces and their attributes and constructors
+
+interface mixin A {
+	constructor();
+
+	attribute double a;
+};
+
+partial interface B {
+	constructor();
+
+	attribute A b;
+};
+
+partial interface B {
+	constructor(float a, double b);
+
+	attribute Int32Array c;
+	attribute B c2;
+};

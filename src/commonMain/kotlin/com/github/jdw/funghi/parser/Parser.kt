@@ -35,21 +35,29 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 		val builder = IdlModelBuilder()
 		var extendedAttribute: IdlExtendedAttribute? = null //TODO Should be list
 
+		//pieces.printAll()
 		pieces popStartScope IdlScope.MODEL
 
 		while (pieces.peekIsStartScope()) {
-			when (pieces peekStartScopeThrow genau) {
+			when (pieces.peekStartScope()) {
 				IdlScope.DICTIONARY -> noop()
 				IdlScope.TYPEDEF -> noop()
 				IdlScope.ENUM -> noop()
 				IdlScope.INTERFACE -> {
-					builder.interfaces += IdlInterface(IdlInterfaceBuilder()
+					IdlInterfaceBuilder()
 						.apply {
 							(null != extendedAttribute)
 								.echt { extendedAttributes += extendedAttribute!! }
 								.echt { extendedAttribute = null }
 						}
-						.apply { thus parse pieces })
+						.apply { thus parse pieces }
+						.apply {
+							if (this.isPartial) {
+								if (builder.partialInterfaces.containsKey(this.name)) builder.partialInterfaces[this.name]!!.fuse(this)
+								else builder.partialInterfaces[this.name!!] = this
+							}
+							else builder.interfaces += IdlInterface(this)
+						}
 				}
 
 				IdlScope.EXTENDED_ATTRIBUTE -> {
@@ -101,8 +109,8 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 
 			if (line.contains("attribute")) {
 				val newLine = line
-					.replace("attribute", "")
-					.replace(";", "")
+					//.replace("attribute", "")
+					.replace(";", " ;")
 				if (line.endsWith(";")) ret += "${IdlScope.ATTRIBUTE.startScopeKeyword()} $newLine ${IdlScope.ATTRIBUTE.endScopeKeyword()}"
 				else ret += "${IdlScope.ATTRIBUTE.startScopeKeyword()} $line"
 
@@ -132,7 +140,16 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 			}
 
 			if (line.contains("constructor(")) {
-				ret += "${IdlScope.OPERATION_CONSTRUCTOR.startScopeKeyword()} $line ${IdlScope.OPERATION_CONSTRUCTOR.endScopeKeyword()}"
+				val newLine = if (line.contains("constructor();")) line // No arguments!
+						.replace("constructor();", "constructor ( );")
+					else line
+						.replace("constructor(", "constructor ( ${IdlScope.ARGUMENT.startScopeKeyword()} ")
+						.replace(");", " ${IdlScope.ARGUMENT.endScopeKeyword()} );")
+						.replace(",", " ${IdlScope.ARGUMENT.endScopeKeyword()} , ${IdlScope.ARGUMENT.startScopeKeyword()} ")
+
+				val newValue = "${IdlScope.OPERATION_CONSTRUCTOR.startScopeKeyword()} $newLine ${IdlScope.OPERATION_CONSTRUCTOR.endScopeKeyword()}"
+
+				ret += newValue
 				continue
 			}
 
@@ -148,7 +165,12 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 			}
 
 			if (line.contains("getter") || line.contains("setter") || line.contains("deleter")) {
-				ret += "${IdlScope.OPERATION.startScopeKeyword()} $line ${IdlScope.OPERATION.endScopeKeyword()}"
+				val newLine = line
+				//.replace("(", "( ")
+				//.replace(")", " )")
+				//.replace(");", " );")
+				//.replace(",", " ,")
+				ret += "${IdlScope.OPERATION.startScopeKeyword()} $newLine ${IdlScope.OPERATION.endScopeKeyword()}"
 				continue
 			}
 
@@ -161,7 +183,12 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 					?: emptyList()
 
 				if (values.isNotEmpty()) {
-					ret += "${IdlScope.OPERATION.startScopeKeyword()} $line ${IdlScope.OPERATION.endScopeKeyword()}"
+					val newLine = line
+						//.replace("(", "( ")
+						//.replace(")", " )")
+						//.replace(");", " );")
+						//.replace(",", " ,")
+					ret += "${IdlScope.OPERATION.startScopeKeyword()} $newLine ${IdlScope.OPERATION.endScopeKeyword()}"
 					continue
 				}
 			}

@@ -7,7 +7,7 @@ class IdlModel(builder: IdlModelBuilder) {
 	val errors = mutableListOf<String>()
 	fun isErrorFree(): Boolean = errors.isEmpty()
 
-	val interfaces: List<IdlInterface> =
+	val interfaces =
 		if (builder.partialInterfaces.isNotEmpty() || builder.interfaces.isNotEmpty()) {
 			val ret = mutableListOf<IdlInterface>()
 			ret.addAll(builder.interfaces)
@@ -16,9 +16,9 @@ class IdlModel(builder: IdlModelBuilder) {
 				.forEach { (_, interfaze) ->
 					ret += IdlInterface(interfaze)
 				}
-			ret.toList()
+			ret.toSet().toTypedArray()
 		}
 		else {
-			emptyList()
+			emptyArray()
 		}
 }
