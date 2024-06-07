@@ -1,19 +1,11 @@
 package com.github.jdw.funghi.parser
 
+
 import Glob
-import com.github.jdw.funghi.fragments.IdlExtendedAttribute
-import com.github.jdw.funghi.fragments.IdlInterface
 import com.github.jdw.funghi.fragments.IdlScope
-import com.github.jdw.funghi.fragments.builders.IdlExtendedAttributeBuilder
-import com.github.jdw.funghi.fragments.builders.IdlInterfaceBuilder
 import com.github.jdw.funghi.model.IdlModel
 import com.github.jdw.funghi.model.builders.IdlModelBuilder
 import com.github.jdw.funghi.pieces.Pieces
-import echt
-import genau
-
-
-import noop
 import throws
 
 
@@ -32,54 +24,66 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 		val data60 = step60TrimPieces(data50)
 		val data65 = step65AddModelStartAndEndScope(data60)
 		val pieces = step70ToPieces(data65)
-		val builder = IdlModelBuilder()
-		var extendedAttribute: IdlExtendedAttribute? = null //TODO Should be list
 
-		pieces popStartScope IdlScope.MODEL
-
-		while (pieces.peekIsStartScope()) {
-			when (pieces.peekStartScope()) {
-				IdlScope.DICTIONARY -> noop()
-				IdlScope.TYPEDEF -> noop()
-				IdlScope.ENUM -> noop()
-				IdlScope.INTERFACE -> {
-					IdlInterfaceBuilder()
-						.apply {
-							(null != extendedAttribute)
-								.echt { extendedAttributes += extendedAttribute!! }
-								.echt { extendedAttribute = null }
-						}
-						.apply { thus parse pieces }
-						.apply {
-							if (this.isPartial) {
-								if (builder.partialInterfaces.containsKey(this.name)) builder.partialInterfaces[this.name]!!.fuse(this)
-								else builder.partialInterfaces[this.name!!] = this
-							}
-							else builder.interfaces += IdlInterface(this)
-						}
-				}
-
-				IdlScope.EXTENDED_ATTRIBUTE -> {
-					extendedAttribute = IdlExtendedAttribute(IdlExtendedAttributeBuilder().apply { parse(pieces) })
-				}
-
-				else -> throws()
-			}
-		}
-
-		pieces popEndScope IdlScope.MODEL
-
-		return IdlModel(builder)
+		return IdlModel(IdlModelBuilder().apply { this parse pieces })
 	}
 
 
-	private fun step70ToPieces(data: String): Pieces = Pieces(data).apply { Glob.pieces = this }
+	private fun step05AddLineNumbers(data: String): String {
+		val ret = mutableListOf<String>()
+		var lineNumber = 1
+		data
+			.split("\n")
+			.forEach { lineRaw ->
+				val line = lineRaw.trim()
+				ret += "${Glob.lineNumberKeyword}$lineNumber $line"
+				lineNumber++
+			}
+
+		return ret.joinToString("\n")
+	}
 
 
-	private fun step65AddModelStartAndEndScope(data: String): String = "${IdlScope.MODEL.startScopeKeyword()} $data ${IdlScope.MODEL.endScopeKeyword()}"
+	private fun step10RemoveLineComments(data: String): String {
+		val ret = mutableListOf<String>()
+
+		data
+			.split("\n")
+			.forEach { line ->
+				ret += if (line.contains("//")) line.split("//").first()
+				else line
+			}
+
+		return ret.joinToString(" ")
+	}
 
 
-	private fun step60TrimPieces(data: String): String = mutableListOf<String>().apply { data.split(" ").forEach { piece -> if (piece.isNotEmpty() && piece.isNotBlank()) add(piece.trim().replace("\n", " "))} }.joinToString(" ")
+	private fun step20RemoveBlockComments(data: String): String {
+		val ret = mutableListOf<String>()
+
+		var weAreInABlockComment = false
+		data
+			.replace("/*", " /* ")
+			.replace("*/", " */ ")
+			.split(" ").forEach { piece ->
+				if (weAreInABlockComment) {
+					if (piece.contains("*/")) {
+						weAreInABlockComment = false
+						//ret += piece.replace("*/", "")
+					}
+				}
+				else {
+					if (piece.contains("/*")) {
+						weAreInABlockComment = true
+						//ret += piece.replace("/*", "")
+					}
+					else if (piece.contains("*/")) throw IllegalStateException("End of block comment found outside of block comment block!")
+					else ret += piece
+				}
+			}
+
+		return ret.joinToString(" ")
+	}
 
 
 	private fun step25EmptyArrayAndEmptyDictionaryToKeywords(data: String): String {
@@ -91,6 +95,30 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 			.replace("= [])", "= ${Glob.emptyArrayKeyword} )")
 			.replace("= {})", "= ${Glob.emptyDictionaryKeyword} )")
 
+	}
+
+
+	private fun step30RemoveAllWhiteSpacesExceptOneSpace(data: String): String {
+		val ret = mutableListOf<String>()
+
+		data
+			.split(" ")
+			.forEach { line ->
+				line
+					.trim()
+					.apply { if ("" != this) ret += this }
+			}
+
+		return ret.joinToString(" ")
+	}
+
+
+	private fun step40InsertNewlineAtTheRightPlaces(data: String): String {
+		return data
+			.replace("[", "\n[")
+			.replace("]", "]\n")
+			.replace(";", ";\n")
+			.replace("{ ", "{\n ")
 	}
 
 
@@ -140,11 +168,11 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 
 			if (line.contains("constructor(")) {
 				val newLine = if (line.contains("constructor();")) line // No arguments!
-						.replace("constructor();", "constructor ( );")
-					else line
-						.replace("constructor(", "constructor ( ${IdlScope.ARGUMENT.startScopeKeyword()} ")
-						.replace(");", " ${IdlScope.ARGUMENT.endScopeKeyword()} );")
-						.replace(",", " ${IdlScope.ARGUMENT.endScopeKeyword()} , ${IdlScope.ARGUMENT.startScopeKeyword()} ")
+					.replace("constructor();", "constructor ( );")
+				else line
+					.replace("constructor(", "constructor ( ${IdlScope.ARGUMENT.startScopeKeyword()} ")
+					.replace(");", " ${IdlScope.ARGUMENT.endScopeKeyword()} );")
+					.replace(",", " ${IdlScope.ARGUMENT.endScopeKeyword()} , ${IdlScope.ARGUMENT.startScopeKeyword()} ")
 
 				val newValue = "${IdlScope.OPERATION_CONSTRUCTOR.startScopeKeyword()} $newLine ${IdlScope.OPERATION_CONSTRUCTOR.endScopeKeyword()}"
 
@@ -183,10 +211,10 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 
 				if (values.isNotEmpty()) {
 					val newLine = line
-						//.replace("(", "( ")
-						//.replace(")", " )")
-						//.replace(");", " );")
-						//.replace(",", " ,")
+					//.replace("(", "( ")
+					//.replace(")", " )")
+					//.replace(");", " );")
+					//.replace(",", " ,")
 					ret += "${IdlScope.OPERATION.startScopeKeyword()} $newLine ${IdlScope.OPERATION.endScopeKeyword()}"
 					continue
 				}
@@ -211,82 +239,11 @@ internal class Parser(val settings: ParserSettings, val filename: String) {
 	}
 
 
-	private fun step40InsertNewlineAtTheRightPlaces(data: String): String {
-		return data
-			.replace("[", "\n[")
-			.replace("]", "]\n")
-			.replace(";", ";\n")
-			.replace("{ ", "{\n ")
-	}
+	private fun step60TrimPieces(data: String): String = mutableListOf<String>().apply { data.split(" ").forEach { piece -> if (piece.isNotEmpty() && piece.isNotBlank()) add(piece.trim().replace("\n", " "))} }.joinToString(" ")
 
 
-	private fun step10RemoveLineComments(data: String): String {
-		val ret = mutableListOf<String>()
-
-		data
-			.split("\n")
-			.forEach { line ->
-				ret += if (line.contains("//")) line.split("//").first()
-				else line
-			}
-
-		return ret.joinToString(" ")
-	}
+	private fun step65AddModelStartAndEndScope(data: String): String = "${IdlScope.MODEL.startScopeKeyword()} $data ${IdlScope.MODEL.endScopeKeyword()}"
 
 
-	private fun step20RemoveBlockComments(data: String): String {
-		val ret = mutableListOf<String>()
-
-		var weAreInABlockComment = false
-		data
-			.replace("/*", " /* ")
-			.replace("*/", " */ ")
-			.split(" ").forEach { piece ->
-				if (weAreInABlockComment) {
-					if (piece.contains("*/")) {
-						weAreInABlockComment = false
-						//ret += piece.replace("*/", "")
-					}
-				}
-				else {
-					if (piece.contains("/*")) {
-						weAreInABlockComment = true
-						//ret += piece.replace("/*", "")
-					}
-					else if (piece.contains("*/")) throw IllegalStateException("End of block comment found outside of block comment block!")
-					else ret += piece
-				}
-			}
-
-		return ret.joinToString(" ")
-	}
-
-	private fun step30RemoveAllWhiteSpacesExceptOneSpace(data: String): String {
-		val ret = mutableListOf<String>()
-
-		data
-			.split(" ")
-			.forEach { line ->
-				line
-					.trim()
-					.apply { if ("" != this) ret += this }
-			}
-
-		return ret.joinToString(" ")
-	}
-
-
-	private fun step05AddLineNumbers(data: String): String {
-		val ret = mutableListOf<String>()
-		var lineNumber = 1
-		data
-			.split("\n")
-			.forEach { lineRaw ->
-				val line = lineRaw.trim()
-				ret += "${Glob.lineNumberKeyword}$lineNumber $line"
-				lineNumber++
-			}
-
-		return ret.joinToString("\n")
-	}
+	private fun step70ToPieces(data: String): Pieces = Pieces(data).apply { Glob.pieces = this }
 }
