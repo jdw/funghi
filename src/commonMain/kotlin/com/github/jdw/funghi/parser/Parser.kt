@@ -218,11 +218,13 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 					?: emptyList()
 
 				if (values.isNotEmpty()) {
-					val newLine = line
-						.replace("(", " ( ")
-						.replace(")", " )")
-						.replace(");", " );")
-						.replace(",", " , ")
+					val newLine =
+						if (line.contains("();")) line.replace("();", " ( );")
+						else line
+								.replace("(", " ( ${Scope.ARGUMENT.startScopeKeyword()} ")
+								//.replace(")", " )")
+								.replace(");", " ${Scope.ARGUMENT.endScopeKeyword()} );")
+								.replace(",", " ${Scope.ARGUMENT.endScopeKeyword()} , ${Scope.ARGUMENT.startScopeKeyword()} ")
 					ret += "${Scope.OPERATION.startScopeKeyword()} $newLine ${Scope.OPERATION.endScopeKeyword()}"
 
 					continue

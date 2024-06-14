@@ -8,6 +8,8 @@ class IdlOperation(builder: IdlOperationBuilder): IdlMember() {
 	val isVoid = builder.isVoid
 	val isUndefined = builder.isUndefined
 	val returnTypes = builder.returnTypes
+	val arguments = builder.arguments
+
 
 	override fun toString(): String {
 		val void = if (isVoid) "void" else ""
@@ -17,6 +19,6 @@ class IdlOperation(builder: IdlOperationBuilder): IdlMember() {
 			else if (returnTypes.isEmpty()) ""
 			else returnTypes.joinToString(",", "(", ")")
 
-		return "$void$undefined$returns $name();"
+		return "$void$undefined$returns $name${arguments.joinToString(", ", "(", ")")};"
 	}
 }

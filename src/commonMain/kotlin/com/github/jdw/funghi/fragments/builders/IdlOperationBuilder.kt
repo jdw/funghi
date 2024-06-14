@@ -1,5 +1,6 @@
 package com.github.jdw.funghi.fragments.builders
 
+import com.github.jdw.funghi.fragments.IdlArgument
 import com.github.jdw.funghi.pieces.Scope.OPERATION
 import com.github.jdw.funghi.fragments.IdlType
 import com.github.jdw.funghi.pieces.Pieces
@@ -9,7 +10,7 @@ class IdlOperationBuilder: IdlMemberBuilder() {
 	var isUndefined: Boolean = false
 	var name: String? = null
 	val returnTypes = mutableListOf<IdlType>()
-
+	val arguments = mutableListOf<IdlArgument>()
 
 	override fun puzzle(pieces: Pieces) {
 		pieces popStartScope OPERATION
@@ -29,6 +30,11 @@ class IdlOperationBuilder: IdlMemberBuilder() {
 		name = pieces pop Glob.parserSettings!!.identifierRegex()
 
 		pieces pop "("
+
+		while (pieces.peekIsStartScope()) {
+			arguments += IdlArgument(IdlArgumentBuilder().apply { thus puzzle pieces })
+			pieces popIfPresent ","
+		}
 
 		pieces pop ");"
 
