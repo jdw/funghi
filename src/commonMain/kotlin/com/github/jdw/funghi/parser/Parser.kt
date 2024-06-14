@@ -207,7 +207,9 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 				continue
 			}
 
-			if (line.contains("(") && !line.contains("constructor")) {
+			if (line.contains("(") &&
+				!line.contains("constructor") &&
+				currentScope == Scope.INTERFACE) {
 				val values = Glob
 					.parserSettings!!
 					.operationRegex()
@@ -217,10 +219,10 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 
 				if (values.isNotEmpty()) {
 					val newLine = line
-					//.replace("(", "( ")
-					//.replace(")", " )")
-					//.replace(");", " );")
-					//.replace(",", " ,")
+						.replace("(", " ( ")
+						.replace(")", " )")
+						.replace(");", " );")
+						.replace(",", " , ")
 					ret += "${Scope.OPERATION.startScopeKeyword()} $newLine ${Scope.OPERATION.endScopeKeyword()}"
 
 					continue

@@ -9,6 +9,8 @@ class IdlOperationBuilder: IdlMemberBuilder() {
 	var isUndefined: Boolean = false
 	var name: String? = null
 	val returnTypes = mutableListOf<IdlType>()
+
+
 	override fun puzzle(pieces: Pieces) {
 		pieces popStartScope OPERATION
 
@@ -24,12 +26,18 @@ class IdlOperationBuilder: IdlMemberBuilder() {
 			}
 		}
 
+		name = pieces pop Glob.parserSettings!!.identifierRegex()
+
+		pieces pop "("
+
+		pieces pop ");"
+
 		pieces popEndScope OPERATION
 	}
 
-	infix fun apply(block: () -> Unit): IdlOperationBuilder {
-		this.apply(block)
-
-		return this
-	}
+//	infix fun apply(block: () -> Unit): IdlOperationBuilder {
+//		this.apply(block)
+//
+//		return this
+//	}
 }

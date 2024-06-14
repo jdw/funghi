@@ -1,0 +1,24 @@
+interface mixin A {
+	constructor();
+
+	void operationA();
+
+	attribute double a;
+};
+
+interface B {
+	constructor();
+
+	undefined operationB();
+
+	attribute A b;
+};
+
+partial interface B {
+	constructor(float a, double b);
+
+	double operationC();
+
+	attribute Int32Array c;
+	attribute B c2;
+};

@@ -127,4 +127,17 @@ class ParserTestInterfaces {
 			println(model.toString())
 		}
 	}
+
+
+	@Test
+	fun `Should manage to use IdlModel toString for testing interface file no 4`() {
+		val fileContent = this::class.java.classLoader.getResource("input-interface-04.idl")?.readText()!!
+		val model = Funghi().parse(fileContent, "input-interfaces-04.idl")
+
+		assert(fileContent == model.toString()) {
+			println(fileContent)
+			println("---")
+			println(model.toString())
+		}
+	}
 }

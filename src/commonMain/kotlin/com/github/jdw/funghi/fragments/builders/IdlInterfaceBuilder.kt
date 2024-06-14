@@ -34,7 +34,7 @@ class IdlInterfaceBuilder() : IdlFragmentBuilder() {
 			when (pieces.peekStartScope()) {
 				OPERATION_CONSTRUCTOR -> operationConstructors += IdlOperationConstructor(IdlOperationConstructorBuilder().apply { thus puzzle pieces })
 				ATTRIBUTE -> attributes += IdlAttribute(IdlAttributeBuilder().apply { thus puzzle pieces })
-				OPERATION -> operations += IdlOperation(IdlOperationBuilder() apply { thus puzzle pieces })
+				OPERATION -> operations += IdlOperation(IdlOperationBuilder().apply { thus puzzle pieces })
 				else -> thus throwing objection
 			}
 		}
