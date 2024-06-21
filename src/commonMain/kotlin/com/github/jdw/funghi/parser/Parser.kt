@@ -6,6 +6,7 @@ import com.github.jdw.funghi.pieces.Scope
 import com.github.jdw.funghi.model.IdlModel
 import com.github.jdw.funghi.model.builders.IdlModelBuilder
 import com.github.jdw.funghi.pieces.Pieces
+import com.github.jdw.funghi.pieces.PiecesBuilder
 import throws
 
 
@@ -24,7 +25,10 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 			.step50InsertStartOfScopeKeywordAndEndOfScopeKeywordAtTheRightPlaces()
 			.step60TrimPieces()
 			.step65AddModelStartAndEndScope()
-			.step70ToPieces()
+			.step70ToPiecesBuilder()
+			//.step300EnhanceExtendedAttributes()
+			//.step900CheckScopeSymmetries()
+			.step1000PiecesBuilderToPieces()
 
 		return IdlModel(IdlModelBuilder().apply { this puzzle pieces })
 	}
@@ -261,5 +265,8 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 	private fun String.step65AddModelStartAndEndScope(): String = "${Scope.MODEL.startScopeKeyword()} $this ${Scope.MODEL.endScopeKeyword()}"
 
 
-	private fun String.step70ToPieces(): Pieces = Pieces(this).apply { Glob.pieces = this }
+	private fun String.step70ToPiecesBuilder(): PiecesBuilder = PiecesBuilder(this)
+
+
+	private fun PiecesBuilder.step1000PiecesBuilderToPieces(): Pieces = Pieces(this)
 }

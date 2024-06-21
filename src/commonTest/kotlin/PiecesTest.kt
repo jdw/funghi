@@ -1,5 +1,6 @@
 import com.github.jdw.funghi.parser.ParserSettings
 import com.github.jdw.funghi.pieces.Pieces
+import com.github.jdw.funghi.pieces.PiecesBuilder
 import org.junit.Test
 
 class PiecesTest {
@@ -9,7 +10,7 @@ class PiecesTest {
 		ParserSettings.entries.forEach { version ->
 			Glob.parserSettings = version
 			val allKeywords = version.allPredefinedTypesKeywords().joinToString(separator = " ${Glob.lineNumberKeyword}53 ", prefix = "${Glob.lineNumberKeyword}5 ", postfix = " ${Glob.lineNumberKeyword}35")
-			val pieces = Pieces(allKeywords)
+			val pieces = Pieces(PiecesBuilder(allKeywords))
 
 			version.allPredefinedTypesKeywords().forEach { _ ->
 				val (result, value) = pieces.popIfPresentSingleTypeThrowIfNot()
@@ -39,7 +40,7 @@ class PiecesTest {
 				}
 				.toList()
 			val allKeywords = allPredefinedKeywordsWitsArrayMarkers.joinToString(separator = " ${Glob.lineNumberKeyword}53 ", prefix = "${Glob.lineNumberKeyword}5 ", postfix = " ${Glob.lineNumberKeyword}35")
-			val pieces = Pieces(allKeywords)
+			val pieces = Pieces(PiecesBuilder(allKeywords))
 
 			version.allPredefinedTypesKeywords().forEach { _ ->
 				val (result, value) = pieces.popIfPresentSingleTypeThrowIfNot()
@@ -69,7 +70,7 @@ class PiecesTest {
 				}
 				.toList()
 			val allKeywords = allPredefinedKeywordsWitsArrayMarkers.joinToString(separator = " ${Glob.lineNumberKeyword}53 ", prefix = "${Glob.lineNumberKeyword}5 ", postfix = " ${Glob.lineNumberKeyword}35")
-			val pieces = Pieces(allKeywords)
+			val pieces = Pieces(PiecesBuilder(allKeywords))
 
 			version.allPredefinedTypesKeywords().forEach { _ ->
 				val (result, value) = pieces.popIfPresentSingleTypeThrowIfNot()
@@ -101,16 +102,17 @@ class PiecesTest {
 				}
 				.toList()
 			val allKeywords = allPredefinedKeywordsWitsArrayMarkers.joinToString(separator = " ${Glob.lineNumberKeyword}53 ", prefix = "${Glob.lineNumberKeyword}5 ", postfix = " ${Glob.lineNumberKeyword}35")
-			val pieces = Pieces(allKeywords)
+			val pieces = Pieces(PiecesBuilder(allKeywords))
 
-			version.allPredefinedTypesKeywords().forEach { _ ->
+			version.allPredefinedTypesKeywords().forEach { keywords ->
+
 				val (result, value) = pieces.popIfPresentSingleTypeThrowIfNot()
 
 				assert(result)
 				assert(version.allPredefinedTypesKeywords().containsRemoveMarkers(value)) {
 					println(allKeywords)
 					println()
-					println("'$value' was missing!")
+					println("'$value' was missing, while using keywords '$keywords'!")
 				}
 			}
 		}
@@ -122,7 +124,7 @@ class PiecesTest {
 		ParserSettings.entries.forEach { version ->
 			Glob.parserSettings = version
 			val allKeywords = listOf("CanvasGradient", "CanvasPattern", "byte", "CanvasDrawPath").joinToString(separator = " ${Glob.lineNumberKeyword}53 ", prefix = "${Glob.lineNumberKeyword}5 ", postfix = " ${Glob.lineNumberKeyword}35")
-			val pieces = Pieces(allKeywords)
+			val pieces = Pieces(PiecesBuilder(allKeywords))
 
 			(0..3).forEach { _ ->
 				val peekResult = pieces.peekIsSingleType()
@@ -155,7 +157,7 @@ class PiecesTest {
 					postfix = " ${Glob.lineNumberKeyword}35"
 				)
 
-				val pieces = Pieces(allKeywords)
+				val pieces = Pieces(PiecesBuilder(allKeywords))
 
 				(0..3).forEach { _ ->
 					val peekResult = pieces.peekIsSingleType()
@@ -193,7 +195,7 @@ class PiecesTest {
 					postfix = " ${Glob.lineNumberKeyword}35"
 				)
 
-				val pieces = Pieces(allKeywords)
+				val pieces = Pieces(PiecesBuilder(allKeywords))
 
 				(0..3).forEach { _ ->
 					val peekResult = pieces.peekIsSingleType()
@@ -233,7 +235,7 @@ class PiecesTest {
 						postfix = " ${Glob.lineNumberKeyword}35"
 					)
 
-					val pieces = Pieces(allKeywords)
+					val pieces = Pieces(PiecesBuilder(allKeywords))
 
 					(0..3).forEach { _ ->
 						val peekResult = pieces.peekIsSingleType()
