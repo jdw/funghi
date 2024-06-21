@@ -1,0 +1,19 @@
+[Replaceable]
+interface A {
+};
+
+[PutForwards=name]
+interface B {
+};
+
+[Exposed=(Window,Worker)]
+interface C {
+};
+
+[Exposed=*]
+interface D {
+};
+
+[LegacyFactoryFunction=Image(DOMString src)]
+interface E {
+};

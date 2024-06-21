@@ -22,7 +22,7 @@ class IdlModelBuilder {
 	val fragments = mutableListOf<IdlFragment>()
 
 	infix fun puzzle(pieces: Pieces) {
-		var extendedAttribute: IdlExtendedAttribute? = null //TODO Should be list
+		var extendedAttributes: List<IdlExtendedAttribute> = mutableListOf()
 
 		pieces popStartScope Scope.MODEL
 
@@ -32,11 +32,10 @@ class IdlModelBuilder {
 				Scope.TYPEDEF -> noop()
 				Scope.ENUM -> noop()
 				Scope.INTERFACE -> {
-					IdlInterfaceBuilder()
+					IdlInterfaceBuilder(extendedAttributes)
 						.apply {
-							(null != extendedAttribute)
-								.echt { extendedAttributes += extendedAttribute!! }
-								.echt { extendedAttribute = null }
+							(extendedAttributes.isNotEmpty())
+								.echt { extendedAttributes = mutableListOf() }
 						}
 						.apply { thus puzzle pieces }
 						.apply {
@@ -46,9 +45,7 @@ class IdlModelBuilder {
 				}
 
 				Scope.EXTENDED_ATTRIBUTE -> {
-					extendedAttribute = IdlExtendedAttribute(IdlExtendedAttributeBuilder().apply { puzzle(
-						pieces
-					) })
+					extendedAttributes = IdlExtendedAttributeBuilder puzzleMultiple pieces
 				}
 
 				else -> throws()

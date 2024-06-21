@@ -1,6 +1,7 @@
 package com.github.jdw.funghi.fragments
 
 import com.github.jdw.funghi.fragments.builders.IdlExtendedAttributeBuilder
+import noop
 
 /**
  * An extended attribute is an annotation that can appear on
@@ -37,6 +38,28 @@ import com.github.jdw.funghi.fragments.builders.IdlExtendedAttributeBuilder
  * @author Johannes Alexis Wirde
  */
 class IdlExtendedAttribute(builder: IdlExtendedAttributeBuilder): IdlFragment {
+	val name = builder.name!!
+	val type = builder.type!!
+	val identifiers = builder.identifiers.toList()
+	val arguments = builder.arguments.toList()
+
+
+	override fun toString(): String {
+		var ret = name
+
+		when (type) {
+			Type.NO_ARGS -> noop()
+			Type.ARG_LIST -> noop()
+			Type.NAMED_ARG_LIST -> ret += "=${identifiers[0]}${arguments.joinToString(prefix = "(", separator = ", ", postfix = ")")}"
+			Type.IDENT -> ret += "=${identifiers[0]}"
+			Type.IDENT_LIST -> ret += "=" + identifiers.joinToString(prefix = "(", separator = ",", postfix = ")")
+			Type.WILDCARD -> ret += "=*"
+		}
+
+		return ret
+	}
+
+
 	enum class Type {
 		/**
 		 * * Grammar symbol = [ExtendedAttributeNoArgs](https://webidl.spec.whatwg.org/#prod-ExtendedAttributeNoArgs)

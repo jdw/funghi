@@ -12,7 +12,7 @@ import com.github.jdw.funghi.pieces.Scope.OPERATION_CONSTRUCTOR
 import com.github.jdw.funghi.pieces.Pieces
 import throws
 
-class IdlInterfaceBuilder() : IdlFragmentBuilder() {
+class IdlInterfaceBuilder(extendAttributes: List<IdlExtendedAttribute>) : IdlFragmentBuilder() {
 	var isMixin = false
 	var isPartial = false
 	var superTypes: MutableList<String>? = null
@@ -20,7 +20,7 @@ class IdlInterfaceBuilder() : IdlFragmentBuilder() {
 	val operationConstructors: MutableSet<IdlOperationConstructor> = mutableSetOf()
 	val operations: MutableSet<IdlOperation> = mutableSetOf() //TODO Test uniqueness of names
 	val attributes: MutableSet<IdlAttribute> = mutableSetOf() //TODO Test uniqueness of names
-	var extendedAttributes = mutableListOf<IdlExtendedAttribute>()
+	val extendedAttributes = extendAttributes.toMutableList()
 
 	override fun puzzle(pieces: Pieces) {
 		pieces popStartScope INTERFACE

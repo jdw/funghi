@@ -7,6 +7,7 @@ import com.github.jdw.funghi.model.IdlModel
 import com.github.jdw.funghi.model.builders.IdlModelBuilder
 import com.github.jdw.funghi.pieces.Pieces
 import com.github.jdw.funghi.pieces.PiecesBuilder
+import echt
 import throws
 
 
@@ -26,7 +27,7 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 			.step60TrimPieces()
 			.step65AddModelStartAndEndScope()
 			.step70ToPiecesBuilder()
-			//.step300EnhanceExtendedAttributes()
+			.step300EnhanceExtendedAttributes()
 			//.step900CheckScopeSymmetries()
 			.step1000PiecesBuilderToPieces()
 
@@ -135,7 +136,25 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 		for (idx in lines.indices) {
 			val line = lines[idx].trim()
 			if (line.contains("[") && line.contains("]")) {
-				ret += "${Scope.EXTENDED_ATTRIBUTE.startScopeKeyword()} $line ${Scope.EXTENDED_ATTRIBUTE.endScopeKeyword()}"
+				var newLine = line
+
+				Glob.parserSettings!!.extendedAttributesWildcardMarkers().forEach { marker ->
+					(newLine.contains("=$marker"))
+						.echt { newLine = newLine.replace("=$marker", " = ${Glob.extendedAttributeWildcardKeyword} ") }
+
+					(newLine.contains("= $marker"))
+						.echt { newLine = newLine.replace("= $marker", " = ${Glob.extendedAttributeWildcardKeyword} ") }
+
+
+				}
+
+				ret += newLine
+					.replace(")", " ) ")
+					.replace("(", " ( ")
+					.replace(",", " , ") //TODO Remove comma for multiple EAs
+					.replace("=", " = ")
+					.replace("[", " ${Scope.EXTENDED_ATTRIBUTE.startScopeKeyword()} ")
+					.replace("]", " ${Scope.EXTENDED_ATTRIBUTE.endScopeKeyword()} ")
 
 				continue
 			}
@@ -266,6 +285,48 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 
 
 	private fun String.step70ToPiecesBuilder(): PiecesBuilder = PiecesBuilder(this)
+
+
+	private fun PiecesBuilder.step300EnhanceExtendedAttributes(): PiecesBuilder {
+		val thus = this
+
+		while (currentIdx < pieces.size - 1) {
+			thus forward 1
+
+			if (!peek(Scope.EXTENDED_ATTRIBUTE.startScopeKeyword())) continue
+
+			thus forward 2
+
+			if (!peek("=")) continue
+
+			thus forward 1
+
+			if (peek(Glob.parserSettings!!.identifierRegex())) {
+				thus forward 1
+
+				if (!peek("(")) continue
+
+				thus forward 1
+
+				push(Scope.ARGUMENT.startScopeKeyword())
+
+				thus forward 3
+
+				thus push Scope.ARGUMENT.endScopeKeyword()
+
+				//TODO peek(",")
+			}
+			else if (peek("(")) {
+				thus replace Scope.EXTENDED_ATTRIBUTE_LIST.startScopeKeyword()
+
+				thus forwardUntil(")")
+
+				thus replace Scope.EXTENDED_ATTRIBUTE_LIST.endScopeKeyword()
+			}
+		}
+
+		return thus
+	}
 
 
 	private fun PiecesBuilder.step1000PiecesBuilderToPieces(): Pieces = Pieces(this)

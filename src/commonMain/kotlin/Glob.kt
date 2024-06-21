@@ -10,6 +10,7 @@ object Glob {
 	val lineNumberKeyword = "${keywordStart}LINE_NUMBER_"
 	val emptyArrayKeyword = "${keywordStart}EMPTY_ARRAY"
 	val emptyDictionaryKeyword = "${keywordStart}EMPTY_DICTIONARY"
+	val extendedAttributeWildcardKeyword = "${keywordStart}EXTENDED_ATTRIBUTES_WILDCARD"
 	val startScopeKeyword = "${keywordStart}START_SCOPE_"
 	val endScopeKeyword = "${keywordStart}END_SCOPE_"
 	var lineNumber = ""

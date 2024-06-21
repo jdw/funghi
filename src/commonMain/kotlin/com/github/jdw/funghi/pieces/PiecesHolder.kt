@@ -10,9 +10,9 @@ import removeNullableMarkers
 import throws
 
 open class PiecesHolder {
-	protected var currentIdx = 0
+	var currentIdx = 0
 	open val pieces = listOf<String>()
-	protected val thus = this
+	private val thus = this
 
 	protected fun takeAStep() {
 		currentIdx++

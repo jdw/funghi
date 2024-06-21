@@ -14,7 +14,8 @@ enum class Scope {
 	EXTENDED_ATTRIBUTE,
 	MULTI_TYPE,
 	MODEL,
-	ARGUMENT;
+	ARGUMENT,
+	EXTENDED_ATTRIBUTE_LIST;
 
 	fun startScopeKeyword(): String = "${Glob.startScopeKeyword}$name"
 	fun endScopeKeyword(): String = "${Glob.endScopeKeyword}$name"

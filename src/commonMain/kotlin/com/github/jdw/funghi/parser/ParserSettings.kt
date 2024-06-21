@@ -35,6 +35,7 @@ enum class ParserSettings {
 		override fun constructorOperationDefinitionKeywords(): Set<String> = setOf("constructor")
 		override fun constructorOperationRegex(): Regex = "constructor\\(.*\\);".toRegex()
 		override fun attributeDefinitionKeywords(): Set<String> = setOf("attribute")
+		override fun extendedAttributesWildcardMarkers(): Set<String> = setOf("*")
 	};
 
 	abstract fun interfaceKeywords(): Set<String>
@@ -62,4 +63,5 @@ enum class ParserSettings {
 	abstract fun constructorOperationDefinitionKeywords(): Set<String>
 	abstract fun constructorOperationRegex(): Regex
 	abstract fun attributeDefinitionKeywords(): Set<String>
+	abstract fun extendedAttributesWildcardMarkers(): Set<String>
 }
