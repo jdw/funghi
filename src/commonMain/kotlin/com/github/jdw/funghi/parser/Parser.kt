@@ -28,7 +28,7 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 			.step65AddModelStartAndEndScope()
 			.step70ToPiecesBuilder()
 			.step300EnhanceExtendedAttributes()
-			//.step900CheckScopeSymmetries()
+			.step900CheckScopeSymmetries()
 			.step1000PiecesBuilderToPieces()
 
 		return IdlModel(IdlModelBuilder().apply { this puzzle pieces })
@@ -326,6 +326,32 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 		}
 
 		return thus
+	}
+
+
+	private fun PiecesBuilder.step900CheckScopeSymmetries(): PiecesBuilder {
+		val scopes = mutableListOf<Scope>()
+
+		pieces.forEach { piece ->
+			if (piece.startsWith(Glob.startScopeKeyword)) {
+				val value = piece.replace(Glob.startScopeKeyword, "")
+				val scope = Scope.valueOf(value)
+
+				scopes.addFirst(scope)
+			}
+			else if (piece.startsWith(Glob.endScopeKeyword)) {
+				val value = piece.replace(Glob.endScopeKeyword, "")
+				val scope = Scope.valueOf(value)
+
+				if (scopes.first() != scope) throws()
+
+				scopes.removeFirst()
+			}
+		}
+
+		scopes.isNotEmpty() echt { throws() }
+
+		return this
 	}
 
 
