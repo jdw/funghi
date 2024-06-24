@@ -1,0 +1,16 @@
+enum SelectionMode {
+  "select",
+  "start",
+  "end",
+  "preserve" // default
+};
+
+enum DOMParserSupportedType {
+  "text/html",
+  "text/xml",
+  "application/xml",
+  "application/xhtml+xml",
+  "image/svg+xml"
+};
+
+enum CanPlayTypeResult { "" /* empty string */, "maybe", "probably" };
