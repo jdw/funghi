@@ -20,14 +20,11 @@ open class PiecesHolder {
 
 
 	fun printAll() {
-		val backwards = currentIdx - 10
-		(backwards..currentIdx).forEach { idx ->
-			(idx >= 0 && idx != currentIdx) echt { println(pieces[idx]) }
+		pieces.forEachIndexed { idx, piece ->
+			(idx == currentIdx)
+				.echt { println("--- Current piece ---> $piece <--- Current piece ---") }
+				.doch { println(piece) }
 		}
-
-		println("--- Current piece ---> ${pieces[currentIdx]} <--- Current piece ---")
-
-		(currentIdx + 1..<pieces.size).forEach { println(it) }
 	}
 
 

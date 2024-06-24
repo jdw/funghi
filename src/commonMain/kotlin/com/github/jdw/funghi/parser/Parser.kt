@@ -7,6 +7,7 @@ import com.github.jdw.funghi.model.IdlModel
 import com.github.jdw.funghi.model.builders.IdlModelBuilder
 import com.github.jdw.funghi.pieces.Pieces
 import com.github.jdw.funghi.pieces.PiecesBuilder
+import doch
 import echt
 import throws
 
@@ -184,7 +185,7 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 				continue
 			}
 
-			if (line.contains("enum")) {
+			if (line.contains(" enum ")) {
 				currentScope = Scope.ENUM
 
 				val newLine = line.replace("enum", "")
@@ -197,7 +198,13 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 			}
 
 			if (line.contains("typedef")) {
-				ret += "${Scope.TYPEDEF.startScopeKeyword()} $line ${Scope.TYPEDEF.endScopeKeyword()}"
+				var newLine = line
+					.replace("typedef", "")
+
+				newLine.contains(";")
+					.doch { currentScope = Scope.TYPEDEF }
+					.echt { newLine = newLine.replace(";", "") }
+				ret += "${Scope.TYPEDEF.startScopeKeyword()} $newLine ${Scope.TYPEDEF.endScopeKeyword()}"
 
 				continue
 			}
@@ -353,7 +360,10 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 				val value = piece.replace(Glob.endScopeKeyword, "")
 				val scope = Scope.valueOf(value)
 
-				if (scopes.first() != scope) throws()
+				if (scopes.first() != scope) {
+					this.printAll()
+					throws()
+				}
 
 				scopes.removeFirst()
 			}
