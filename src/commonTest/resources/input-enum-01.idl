@@ -1,4 +1,7 @@
 enum DocumentReadyState { "loading", "interactive", "complete" };
+
 enum DocumentVisibilityState { "visible", "hidden" };
-enum TextTrackMode { "disabled",  "hidden",  "showing" };
-enum TextTrackKind { "subtitles",  "captions",  "descriptions",  "chapters",  "metadata" };
+
+enum TextTrackMode { "disabled", "hidden", "showing" };
+
+enum TextTrackKind { "subtitles", "captions", "descriptions", "chapters", "metadata" };

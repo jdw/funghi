@@ -7,6 +7,7 @@ import com.github.jdw.funghi.fragments.IdlFragment
 import com.github.jdw.funghi.fragments.IdlInterface
 import com.github.jdw.funghi.pieces.Scope
 import com.github.jdw.funghi.fragments.IdlTypedef
+import com.github.jdw.funghi.fragments.builders.IdlEnumBuilder
 import com.github.jdw.funghi.fragments.builders.IdlExtendedAttributeBuilder
 import com.github.jdw.funghi.fragments.builders.IdlInterfaceBuilder
 import com.github.jdw.funghi.pieces.Pieces
@@ -30,7 +31,7 @@ class IdlModelBuilder {
 			when (pieces.peekStartScope()) {
 				Scope.DICTIONARY -> noop()
 				Scope.TYPEDEF -> noop()
-				Scope.ENUM -> noop()
+				Scope.ENUM -> enums += IdlEnum(IdlEnumBuilder().apply { thus puzzle pieces }).apply { fragments += this }
 				Scope.INTERFACE -> {
 					IdlInterfaceBuilder(extendedAttributes)
 						.apply {

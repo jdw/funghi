@@ -14,3 +14,5 @@ enum DOMParserSupportedType {
 };
 
 enum CanPlayTypeResult { "" /* empty string */, "maybe", "probably" };
+
+//enum NonExistent { "" /* empty string */, "maybe", "probably" };

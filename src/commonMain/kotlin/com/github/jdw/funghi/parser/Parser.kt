@@ -135,6 +135,7 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 		val lines = this.split("\n")
 		for (idx in lines.indices) {
 			val line = lines[idx].trim()
+
 			if (line.contains("[") && line.contains("]")) {
 				var newLine = line
 
@@ -184,7 +185,13 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 			}
 
 			if (line.contains("enum")) {
-				ret += "${Scope.ENUM.startScopeKeyword()} $line ${Scope.ENUM.endScopeKeyword()}"
+				currentScope = Scope.ENUM
+
+				val newLine = line.replace("enum", "")
+
+				// Enum as a one-liner or defined on multiple lines
+				if (line.contains("};")) ret += "${Scope.ENUM.startScopeKeyword()} $newLine ${Scope.ENUM.endScopeKeyword()}"
+				else ret += "${Scope.ENUM.startScopeKeyword()} $newLine "
 
 				continue
 			}
@@ -213,6 +220,9 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 				ret += when (currentScope) {
 					Scope.DICTIONARY -> Scope.DICTIONARY.endScopeKeyword()
 					Scope.INTERFACE -> Scope.INTERFACE.endScopeKeyword()
+					Scope.ENUM -> line
+						.replace("};", " ${Scope.ENUM.endScopeKeyword()} ")
+						.replace("\",", "\" , ")
 					else -> throws()
 				}
 
