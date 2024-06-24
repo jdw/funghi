@@ -1,0 +1,9 @@
+// Union types as return types
+
+interface A {
+	constructor(optional (double or float) a);
+
+	(double or float) operationA(optional A a, optional double b);
+	(bigint or byte) operationB(optional (A or double or float?) a, double b);
+	float operationC((float or double or bigint)? a);
+};

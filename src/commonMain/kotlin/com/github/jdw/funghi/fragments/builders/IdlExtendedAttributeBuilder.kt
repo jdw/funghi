@@ -34,12 +34,14 @@ class IdlExtendedAttributeBuilder: IdlFragmentBuilder() {
 					type = IdlExtendedAttribute.Type.NAMED_ARG_LIST
 					pieces pop "("
 
-					var weHaveAnotherArgument = !pieces.peek(")")
+					var weHaveAnotherArgument = pieces popIfPresentStartScope Scope.ARGUMENT
 					while (weHaveAnotherArgument) {
 						arguments += IdlArgument(IdlArgumentBuilder().apply { thus puzzle pieces })
 
 						weHaveAnotherArgument = pieces popIfPresent ","
 					}
+
+					pieces popIfPresentEndScope Scope.ARGUMENT
 					pieces pop ")"
 				}
 				else {

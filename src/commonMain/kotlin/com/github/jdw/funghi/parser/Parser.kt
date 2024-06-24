@@ -239,11 +239,13 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 			if (line.contains("constructor(")) {
 				val newLine = if (line.contains("constructor();"))
 					line // No arguments!
-						.replace("constructor();", "constructor ( ) ;")
+						.replace("constructor();", "constructor ${Scope.ARGUMENTS.startScopeKeyword()} ${Scope.ARGUMENTS.endScopeKeyword()} ")
 				else line
-					.replace("constructor(", "constructor ( ${Scope.ARGUMENT.startScopeKeyword()} ")
-					.replace(");", " ${Scope.ARGUMENT.endScopeKeyword()} ) ;")
-					.replace(",", " ${Scope.ARGUMENT.endScopeKeyword()} , ${Scope.ARGUMENT.startScopeKeyword()} ")
+					.replace("constructor(", "constructor ${Scope.ARGUMENTS.startScopeKeyword()} ${Scope.ARGUMENT.startScopeKeyword()} ")
+					.replace(");", " ${Scope.ARGUMENT.endScopeKeyword()} ${Scope.ARGUMENTS.endScopeKeyword()} ")
+					.replace(",", " ${Scope.ARGUMENT.nextScopeKeyword()} ")
+					.replace("(", " ${Scope.UNION_TYPE.startScopeKeyword()} ")
+					.replace(")", " ${Scope.UNION_TYPE.endScopeKeyword()} ")
 
 				ret += "${Scope.OPERATION_CONSTRUCTOR.startScopeKeyword()} $newLine ${Scope.OPERATION_CONSTRUCTOR.endScopeKeyword()}"
 
@@ -287,12 +289,15 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 
 				if (values.isNotEmpty()) {
 					val newLine =
-						if (line.contains("();")) line.replace("();", " ( ) ;")
+						if (line.contains("();")) line.replace("();", " ${Scope.ARGUMENTS.startScopeKeyword()} ${Scope.ARGUMENTS.endScopeKeyword()} ")
 						else line
-								.replace("(", " ( ${Scope.ARGUMENT.startScopeKeyword()} ")
-								//.replace(")", " )")
-								.replace(");", " ${Scope.ARGUMENT.endScopeKeyword()} ) ;")
-								.replace(",", " ${Scope.ARGUMENT.endScopeKeyword()} , ${Scope.ARGUMENT.startScopeKeyword()} ")
+								.replaceFirst("(", " ${Scope.ARGUMENTS.startScopeKeyword()} ${Scope.ARGUMENT.startScopeKeyword()} ")
+								//.replace(") ", " ${Scope.} ) ")
+								.replace(");", " ${Scope.ARGUMENT.endScopeKeyword()} ${Scope.ARGUMENTS.endScopeKeyword()} ")
+								.replace(",", " ${Scope.ARGUMENT.nextScopeKeyword()} ")
+								.replace("(", " ${Scope.UNION_TYPE.startScopeKeyword()} ")
+								.replace(")", " ${Scope.UNION_TYPE.endScopeKeyword()} ")
+
 					ret += "${Scope.OPERATION.startScopeKeyword()} $newLine ${Scope.OPERATION.endScopeKeyword()}"
 
 					continue

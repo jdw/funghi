@@ -253,6 +253,28 @@ open class PiecesHolder {
 	}
 
 
+	infix fun popIfPresentNextScope(scope: Scope): Boolean {
+		popUntilNotLineNumber()
+
+		return if (peek(scope.nextScopeKeyword())) {
+			pop(1)
+			true
+		}
+		else false
+	}
+
+
+	infix fun popIfPresentEndScope(scope: Scope): Boolean {
+		popUntilNotLineNumber()
+
+		return if (peek(scope.endScopeKeyword())) {
+			pop(1)
+			true
+		}
+		else false
+	}
+
+
 	fun popIfPresentType(): Pair<Boolean, String> {
 		popUntilNotLineNumber()
 

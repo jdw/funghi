@@ -1,8 +1,9 @@
 package com.github.jdw.funghi.fragments.builders
 
-import com.github.jdw.funghi.pieces.Scope.ARGUMENT
+import Glob
 import com.github.jdw.funghi.fragments.IdlType
 import com.github.jdw.funghi.pieces.Pieces
+import com.github.jdw.funghi.pieces.Scope
 
 class IdlArgumentBuilder: IdlFragmentBuilder() {
 	var name: String? = null
@@ -10,14 +11,32 @@ class IdlArgumentBuilder: IdlFragmentBuilder() {
 	var isOptional = false
 
 	override fun puzzle(pieces: Pieces) {
-		pieces popStartScope ARGUMENT
+		//pieces popStartScope ARGUMENT
 
 		isOptional = pieces popIfPresent "optional"
 
-		types += IdlType(IdlTypeBuilder().apply { thus puzzle pieces })
+		var weHaveAnotherUnionType = pieces popIfPresentStartScope Scope.UNION_TYPE
+		if (weHaveAnotherUnionType) {
+			val unionTypes = mutableListOf<IdlTypeBuilder>()
+			while (weHaveAnotherUnionType) {
+				unionTypes += IdlTypeBuilder().apply { thus puzzle pieces }
+				weHaveAnotherUnionType = pieces popIfPresentNextScope Scope.UNION_TYPE
+			}
+
+			pieces popEndScope Scope.UNION_TYPE
+
+			if (pieces popIfPresent "?") {
+				unionTypes.forEach { it.isNullable = true }
+			}
+
+			unionTypes.forEach { types += IdlType(it) }
+		}
+		else {
+			types += IdlType(IdlTypeBuilder().apply { thus puzzle pieces })
+		}
 
 		name = pieces pop Glob.parserSettings!!.identifierRegex()
 
-		pieces popEndScope ARGUMENT
+		//pieces popEndScope ARGUMENT
 	}
 }

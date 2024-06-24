@@ -1,0 +1,14 @@
+// Union types as operation and constructor arguments
+
+interface A { constructor(optional double a); };
+
+interface B {
+};
+
+interface C {
+	constructor(optional (double or float) a);
+
+	undefined operationA(optional A a, optional double b);
+	undefined operationB(optional (A or double or float?) a, double b);
+	float operationC((float or double or bigint)? a);
+};

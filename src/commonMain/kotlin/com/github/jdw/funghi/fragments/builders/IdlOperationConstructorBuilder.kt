@@ -3,6 +3,7 @@ package com.github.jdw.funghi.fragments.builders
 import com.github.jdw.funghi.fragments.IdlArgument
 import com.github.jdw.funghi.pieces.Scope.OPERATION_CONSTRUCTOR
 import com.github.jdw.funghi.pieces.Pieces
+import com.github.jdw.funghi.pieces.Scope
 
 class IdlOperationConstructorBuilder: IdlMemberBuilder() {
 	//var extendedAttributes: MutableList<IdlExtendedAttribute> = mutableListOf()
@@ -12,15 +13,16 @@ class IdlOperationConstructorBuilder: IdlMemberBuilder() {
 		pieces popStartScope OPERATION_CONSTRUCTOR
 
 		pieces pop "constructor"
-		pieces pop "("
+		pieces popStartScope  Scope.ARGUMENTS
 
-		while (pieces.peekIsStartScope()) {
+		var weHaveAnotherArgument = pieces popIfPresentStartScope Scope.ARGUMENT
+		while (weHaveAnotherArgument) {
 			arguments += IdlArgument(IdlArgumentBuilder().apply { thus puzzle pieces })
-			pieces popIfPresent ","
+			weHaveAnotherArgument = pieces popIfPresentNextScope Scope.ARGUMENT
 		}
 
-		pieces pop ")"
-		pieces pop ";"
+		pieces popIfPresentEndScope Scope.ARGUMENT
+		pieces popEndScope Scope.ARGUMENTS
 
 		pieces popEndScope OPERATION_CONSTRUCTOR
 	}
