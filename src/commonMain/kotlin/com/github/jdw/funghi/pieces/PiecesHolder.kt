@@ -253,7 +253,7 @@ open class PiecesHolder {
 	}
 
 
-	fun popIfPresentSingleType(): Pair<Boolean, String> {
+	fun popIfPresentType(): Pair<Boolean, String> {
 		popUntilNotLineNumber()
 
 		try {
@@ -320,7 +320,7 @@ open class PiecesHolder {
 	fun popIfPresentSingleTypeThrowIfNot(): Pair<Boolean, String> { //TODO remove
 		popUntilNotLineNumber()
 
-		val ret = popIfPresentSingleType()
+		val ret = popIfPresentType()
 
 		ret.first doch { throws() }
 
@@ -328,10 +328,10 @@ open class PiecesHolder {
 	}
 
 
-	fun popSingleType(): String {
+	fun popType(): String {
 		popUntilNotLineNumber()
 
-		val ret = popIfPresentSingleType()
+		val ret = popIfPresentType()
 
 		ret.first doch { throws() }
 

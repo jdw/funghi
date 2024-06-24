@@ -21,11 +21,11 @@ class IdlTypeBuilder: IdlFragmentBuilder() {
 	override infix fun puzzle(pieces: Pieces) {
 		if (pieces popIfPresentStartScope Scope.SEQUENCE) {
 			isSequence = true
-			name = pieces.popSingleType()
+			name = pieces.popType()
 			pieces popEndScope Scope.SEQUENCE
 		}
 		else {
-			name = pieces.popSingleType()
+			name = pieces.popType()
 		}
 
 		name!!.contains("?")
