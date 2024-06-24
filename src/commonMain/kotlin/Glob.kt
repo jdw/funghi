@@ -13,6 +13,7 @@ object Glob {
 	val extendedAttributeWildcardKeyword = "${keywordStart}EXTENDED_ATTRIBUTES_WILDCARD"
 	val startScopeKeyword = "${keywordStart}START_SCOPE_"
 	val endScopeKeyword = "${keywordStart}END_SCOPE_"
+	val nextScopeKeyword = "${keywordStart}NEXT_SCOPE_"
 	var lineNumber = ""
 	fun getLineNumber(): Int = lineNumber.replace(Glob.lineNumberKeyword, "").toInt()
 }

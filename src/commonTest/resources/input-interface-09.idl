@@ -1,0 +1,20 @@
+interface A {};
+
+
+
+interface B {
+
+
+
+};
+
+interface D {
+	attribute A a;
+	attribute (A or B) b;
+	attribute (long long or
+				unsigned long long or
+				B)? allNullable;
+	attribute (long long? or
+				unsigned long long? or
+				A) someNullable;
+};

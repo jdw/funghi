@@ -1,0 +1,20 @@
+interface A {
+	attribute double a;
+};
+
+interface B {
+	attribute A a;
+	attribute (A or double) b;
+};
+
+partial interface B {
+	attribute Int32Array c;
+	attribute B c2;
+};
+
+interface C {
+	attribute A a;
+	attribute (A or B) b;
+	attribute (long long or unsigned long long or float)? allNullable;
+	attribute (long long? or unsigned long long? or float) someNullable;
+};

@@ -10,6 +10,13 @@ open class IdlAttribute(builder: IdlAttributeBuilder): IdlMember() {
 	override fun toString(): String {
 		val readonly = if (isReadonly) "readonly " else ""
 
-		return "${readonly}attribute ${types.joinToString(", ")} $name;"
+		return if (types.size == 1) "${readonly}attribute ${types[0]} $name;"
+			else if (types.all { it.isNullable }) {
+				val typesStr = types
+					.joinToString(prefix = "(", separator = " or ", postfix = ")")
+					.replace("?", "")
+				"${readonly}attribute $typesStr? $name;"
+			}
+			else "${readonly}attribute ${types.joinToString(prefix = "(", separator = " or ", postfix = ")")} $name;"
 	}
 }

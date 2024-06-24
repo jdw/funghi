@@ -19,7 +19,8 @@ class IdlOperationConstructorBuilder: IdlMemberBuilder() {
 			pieces popIfPresent ","
 		}
 
-		pieces pop ");"
+		pieces pop ")"
+		pieces pop ";"
 
 		pieces popEndScope OPERATION_CONSTRUCTOR
 	}

@@ -125,7 +125,8 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 			.replace("[", "\n[")
 			.replace("]", "]\n")
 			.replace(";", ";\n")
-			.replace("{ ", "{\n ")
+			.replace("{", "{\n ")
+			.replace(" or ", " ${Scope.UNION_TYPE.nextScopeKeyword()} ")
 	}
 
 
@@ -135,7 +136,15 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 		var currentScope: Scope? = null
 		val lines = this.split("\n")
 		for (idx in lines.indices) {
-			val line = lines[idx].trim()
+			val lineProto = lines[idx]
+				.trim()
+
+			val line = if (lineProto.contains("sequence<") && lineProto.contains(">")) {
+					lineProto
+						.replace("sequence<", " ${Scope.SEQUENCE.startScopeKeyword()} ")
+						.replace(">", " ${Scope.SEQUENCE.endScopeKeyword()} ")
+				}
+				else lineProto
 
 			if (line.contains("[") && line.contains("]")) {
 				var newLine = line
@@ -161,24 +170,35 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 				continue
 			}
 
-			if (line.contains("attribute")) {
-				val newLine = line
+			if (line.contains(" attribute ")) {
+				var newLine = if (line.contains(" ${Scope.UNION_TYPE.nextScopeKeyword()} ")) {
+						line
+							.replace("(", " ${Scope.UNION_TYPE.startScopeKeyword()} ")
+							.replace(")", " ${Scope.UNION_TYPE.endScopeKeyword()} ")
+					}
+					else line
 					//.replace("attribute", "")
-					.replace(";", " ;")
-				if (line.endsWith(";")) ret += "${Scope.ATTRIBUTE.startScopeKeyword()} $newLine ${Scope.ATTRIBUTE.endScopeKeyword()}"
-				else ret += "${Scope.ATTRIBUTE.startScopeKeyword()} $line"
+
+				if (line.endsWith(";")) {
+					newLine = newLine.replace(";", "")
+					ret += "${Scope.ATTRIBUTE.startScopeKeyword()} $newLine ${Scope.ATTRIBUTE.endScopeKeyword()}"
+				}
+				else {
+					currentScope = Scope.ATTRIBUTE
+					ret += "${Scope.ATTRIBUTE.startScopeKeyword()} $newLine"
+				}
 
 				continue
 			}
 
-			if (line.contains("interface")) {
+			if (line.contains(" interface ")) {
 				currentScope = Scope.INTERFACE
 				ret += "${Scope.INTERFACE.startScopeKeyword()} $line"
 
 				continue
 			}
 
-			if (line.contains("dictionary")) {
+			if (line.contains(" dictionary ")) {
 				currentScope = Scope.DICTIONARY
 				ret += "${Scope.DICTIONARY.startScopeKeyword()} $line"
 
@@ -197,24 +217,32 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 				continue
 			}
 
-			if (line.contains("typedef")) {
+			if (line.contains(" typedef ")) {
 				var newLine = line
 					.replace("typedef", "")
+					.replace("(", " ( ")
+					.replace(")", " ) ")
 
 				newLine.contains(";")
-					.doch { currentScope = Scope.TYPEDEF }
-					.echt { newLine = newLine.replace(";", "") }
-				ret += "${Scope.TYPEDEF.startScopeKeyword()} $newLine ${Scope.TYPEDEF.endScopeKeyword()}"
+					.doch {
+						currentScope = Scope.TYPEDEF
+						ret += "${Scope.TYPEDEF.startScopeKeyword()} $newLine "
+					}
+					.echt {
+						newLine = newLine.replace(";", "")
+						ret += "${Scope.TYPEDEF.startScopeKeyword()} $newLine ${Scope.TYPEDEF.endScopeKeyword()}"
+					}
 
 				continue
 			}
 
 			if (line.contains("constructor(")) {
-				val newLine = if (line.contains("constructor();")) line // No arguments!
-					.replace("constructor();", "constructor ( );")
+				val newLine = if (line.contains("constructor();"))
+					line // No arguments!
+						.replace("constructor();", "constructor ( ) ;")
 				else line
 					.replace("constructor(", "constructor ( ${Scope.ARGUMENT.startScopeKeyword()} ")
-					.replace(");", " ${Scope.ARGUMENT.endScopeKeyword()} );")
+					.replace(");", " ${Scope.ARGUMENT.endScopeKeyword()} ) ;")
 					.replace(",", " ${Scope.ARGUMENT.endScopeKeyword()} , ${Scope.ARGUMENT.startScopeKeyword()} ")
 
 				ret += "${Scope.OPERATION_CONSTRUCTOR.startScopeKeyword()} $newLine ${Scope.OPERATION_CONSTRUCTOR.endScopeKeyword()}"
@@ -259,11 +287,11 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 
 				if (values.isNotEmpty()) {
 					val newLine =
-						if (line.contains("();")) line.replace("();", " ( );")
+						if (line.contains("();")) line.replace("();", " ( ) ;")
 						else line
 								.replace("(", " ( ${Scope.ARGUMENT.startScopeKeyword()} ")
 								//.replace(")", " )")
-								.replace(");", " ${Scope.ARGUMENT.endScopeKeyword()} );")
+								.replace(");", " ${Scope.ARGUMENT.endScopeKeyword()} ) ;")
 								.replace(",", " ${Scope.ARGUMENT.endScopeKeyword()} , ${Scope.ARGUMENT.startScopeKeyword()} ")
 					ret += "${Scope.OPERATION.startScopeKeyword()} $newLine ${Scope.OPERATION.endScopeKeyword()}"
 
@@ -284,8 +312,24 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 				continue
 			}
 
-			if (line.endsWith(";")) ret += "$line ${Scope.ATTRIBUTE.endScopeKeyword()}"
-			else ret += line
+			line.endsWith(";")
+				.echt {
+					//println("--- $line")
+					when (currentScope) {
+						Scope.ATTRIBUTE -> {
+							ret += "${line.replace(";", "")} ${Scope.ATTRIBUTE.endScopeKeyword()}"
+							currentScope = Scope.INTERFACE
+						}
+						Scope.TYPEDEF -> {
+							ret += "${line.replace(";", "")} ${Scope.TYPEDEF.endScopeKeyword()}"
+							currentScope = null
+						}
+						else -> {
+							throws()
+						}
+					}
+				}
+				.doch { ret += line }
 		}
 
 		return ret.joinToString("\n")
@@ -348,8 +392,11 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 
 	private fun PiecesBuilder.step900CheckScopeSymmetries(): PiecesBuilder {
 		val scopes = mutableListOf<Scope>()
+		var lineNumber = ""
 
 		pieces.forEach { piece ->
+			if (piece.startsWith(Glob.lineNumberKeyword)) lineNumber = piece
+
 			if (piece.startsWith(Glob.startScopeKeyword)) {
 				val value = piece.replace(Glob.startScopeKeyword, "")
 				val scope = Scope.valueOf(value)
@@ -361,6 +408,10 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 				val scope = Scope.valueOf(value)
 
 				if (scopes.first() != scope) {
+					println("scopes.first() = ${scopes.first()}")
+					println("scope = $scope")
+					println("lineNumber = $lineNumber")
+					println("---")
 					this.printAll()
 					throws()
 				}

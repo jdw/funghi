@@ -7,7 +7,7 @@ import com.github.jdw.funghi.pieces.Scope
 import noop
 
 class IdlTypedefBuilder: IdlFragmentBuilder() {
-	var type: IdlType? = null
+	val types = mutableListOf<IdlType>()
 	var identifier: String? = null
 
 
@@ -17,10 +17,24 @@ class IdlTypedefBuilder: IdlFragmentBuilder() {
 		pieces popStartScope Scope.TYPEDEF
 
 		if (pieces.peekIsSingleType()) {
-			type = IdlType(IdlTypeBuilder().apply { thus puzzle pieces })
+			types += IdlType(IdlTypeBuilder().apply { thus puzzle pieces })
 		}
 		else {
-			noop()
+			pieces pop "("
+
+			var weHaveAnotherType = true
+			val unionTypes = mutableListOf<IdlTypeBuilder>()
+
+			while (weHaveAnotherType) {
+				unionTypes += IdlTypeBuilder().apply { thus puzzle pieces }
+				weHaveAnotherType = pieces popIfPresent Scope.UNION_TYPE.nextScopeKeyword()
+			}
+
+			pieces pop ")"
+
+			if (pieces popIfPresent "?") unionTypes.forEach { it.isNullable = true }
+
+			unionTypes.forEach { types += IdlType(it) }
 		}
 
 		identifier = pieces pop Glob.parserSettings!!.identifierRegex()

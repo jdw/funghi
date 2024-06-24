@@ -16,9 +16,13 @@ class IdlType(builder: IdlTypeBuilder): IdlFragment {
 	val name = builder.name!!
 	val isArray = builder.isArray
 	val isNullable = builder.isNullable
+	val isSequence = builder.isSequence
+
 
 	override fun toString(): String {
 		var ret = name
+
+		isSequence echt { ret = "sequence<$name>"}
 		isArray echt { ret += "[]" }
 		isNullable echt { ret += "?" }
 

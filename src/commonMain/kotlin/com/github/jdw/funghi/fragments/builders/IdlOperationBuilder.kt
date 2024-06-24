@@ -36,7 +36,8 @@ class IdlOperationBuilder: IdlMemberBuilder() {
 			pieces popIfPresent ","
 		}
 
-		pieces pop ");"
+		pieces pop ")"
+		pieces pop ";"
 
 		pieces popEndScope OPERATION
 	}

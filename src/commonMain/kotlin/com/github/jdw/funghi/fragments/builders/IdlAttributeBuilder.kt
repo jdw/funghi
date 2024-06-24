@@ -1,10 +1,10 @@
 package com.github.jdw.funghi.fragments.builders
 
-import com.github.jdw.funghi.pieces.Scope.ATTRIBUTE
+import Glob
 import com.github.jdw.funghi.fragments.IdlType
 import com.github.jdw.funghi.pieces.Pieces
-import doch
-import echt
+import com.github.jdw.funghi.pieces.Scope
+import com.github.jdw.funghi.pieces.Scope.ATTRIBUTE
 
 class IdlAttributeBuilder: IdlMemberBuilder() {
 	var extendedAttributes: MutableList<IdlExtendedAttributeBuilder>? = null
@@ -19,18 +19,28 @@ class IdlAttributeBuilder: IdlMemberBuilder() {
 		isReadonly = pieces popIfPresent "readonly"
 		isUnrestricted = pieces popIfPresent "unrestricted"
 
-		pieces peekIsSingleType { genau ->
-			genau.echt {
-				types += IdlType(IdlTypeBuilder().apply { thus puzzle pieces })
-			}
-			.doch {
+		if (pieces.peekIsSingleType()) {
+			types += IdlType(IdlTypeBuilder().apply { thus puzzle pieces })
+		}
+		else {
+			pieces popStartScope Scope.UNION_TYPE
 
+			var weHaveAnotherType = true
+			val unionTypes = mutableListOf<IdlTypeBuilder>()
+
+			while (weHaveAnotherType) {
+				unionTypes += IdlTypeBuilder().apply { thus puzzle pieces }
+				weHaveAnotherType = pieces popIfPresent Scope.UNION_TYPE.nextScopeKeyword()
 			}
+
+			pieces popEndScope Scope.UNION_TYPE
+
+			if (pieces popIfPresent "?") unionTypes.forEach { it.isNullable = true }
+
+			unionTypes.forEach { types += IdlType(it) }
 		}
 
 		name = pieces pop Glob.parserSettings!!.identifierRegex()
-
-		pieces pop ";"
 
 		pieces popEndScope ATTRIBUTE
 	}

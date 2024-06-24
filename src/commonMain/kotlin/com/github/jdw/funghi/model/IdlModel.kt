@@ -24,6 +24,8 @@ class IdlModel(builder: IdlModelBuilder) {
 	private val fragments = builder.fragments.toTypedArray()
 
 	val enums = builder.enums.toList()
+	val typedefs = builder.typedefs.toList()
+
 
 	override fun toString(): String = fragments.joinToString("\n\n")
 }

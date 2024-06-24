@@ -36,7 +36,11 @@ open class PiecesHolder {
 			(idx >= 0 && idx != currentIdx) echt { ret.add(pieces[idx]) }
 		}
 
-		ret.add("--- Current piece ---> ${pieces[currentIdx]} <--- Current piece ---")
+		val displayedIdx =
+			if (pieces.size == currentIdx) currentIdx - 1
+			else currentIdx
+
+		ret.add("--- Current piece ---> ${pieces[displayedIdx]} <--- Current piece ---")
 
 		(currentIdx + 1..currentIdx + 11).forEach { idx ->
 			if (idx < pieces.size) ret.add(pieces[idx])
@@ -234,6 +238,18 @@ open class PiecesHolder {
 		popUntilNotLineNumber()
 
 		return (pieces[currentIdx] matches pattern) echt { takeAStep() }
+	}
+
+
+	infix fun popIfPresentStartScope(scope: Scope): Boolean {
+		popUntilNotLineNumber()
+
+		return if (peek(scope.startScopeKeyword())) {
+				pop(1)
+				true
+			}
+			else false
+
 	}
 
 
