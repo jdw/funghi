@@ -5,6 +5,8 @@ import com.github.jdw.funghi.pieces.Scope.OPERATION
 import com.github.jdw.funghi.fragments.IdlType
 import com.github.jdw.funghi.pieces.Pieces
 import com.github.jdw.funghi.pieces.Scope
+import doch
+import throws
 
 class IdlOperationBuilder: IdlMemberBuilder() {
 	var isVoid: Boolean = false
@@ -24,7 +26,22 @@ class IdlOperationBuilder: IdlMemberBuilder() {
 				returnTypes += IdlType(IdlTypeBuilder().apply { thus puzzle pieces })
 			}
 			else {
-				//TODO multi-type type val value = pieces.pop
+				val unionTypes = mutableListOf<IdlTypeBuilder>()
+				var weHaveAnotherUnionType = pieces popIfPresentStartScope Scope.UNION_TYPE
+				weHaveAnotherUnionType doch { throws() }
+
+				while (weHaveAnotherUnionType) {
+					unionTypes += IdlTypeBuilder().apply { thus puzzle pieces }
+					weHaveAnotherUnionType = pieces popIfPresentNextScope Scope.UNION_TYPE
+				}
+
+				pieces popEndScope Scope.UNION_TYPE
+
+				if (pieces popIfPresent "?") {
+					unionTypes.forEach { it.isNullable = true }
+				}
+
+				unionTypes.forEach { returnTypes += IdlType(it) }
 			}
 		}
 

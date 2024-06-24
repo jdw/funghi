@@ -288,15 +288,21 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 					?: emptyList()
 
 				if (values.isNotEmpty()) {
-					val newLine =
+					var newLine =
 						if (line.contains("();")) line.replace("();", " ${Scope.ARGUMENTS.startScopeKeyword()} ${Scope.ARGUMENTS.endScopeKeyword()} ")
-						else line
+						else {
+							val newValue = values[0]
 								.replaceFirst("(", " ${Scope.ARGUMENTS.startScopeKeyword()} ${Scope.ARGUMENT.startScopeKeyword()} ")
 								//.replace(") ", " ${Scope.} ) ")
 								.replace(");", " ${Scope.ARGUMENT.endScopeKeyword()} ${Scope.ARGUMENTS.endScopeKeyword()} ")
 								.replace(",", " ${Scope.ARGUMENT.nextScopeKeyword()} ")
-								.replace("(", " ${Scope.UNION_TYPE.startScopeKeyword()} ")
-								.replace(")", " ${Scope.UNION_TYPE.endScopeKeyword()} ")
+
+							line.replace(values[0], newValue)
+						}
+
+					newLine = newLine
+						.replace("(", " ${Scope.UNION_TYPE.startScopeKeyword()} ")
+						.replace(")", " ${Scope.UNION_TYPE.endScopeKeyword()} ")
 
 					ret += "${Scope.OPERATION.startScopeKeyword()} $newLine ${Scope.OPERATION.endScopeKeyword()}"
 

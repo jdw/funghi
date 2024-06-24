@@ -70,16 +70,25 @@ interface C {
 	}
 
 
-//	@Test
-//	fun `Should manage to use IdlModel toString for testing typedef file no 11`() {
-//		val fileContent = this::class.java.classLoader.getResource("input-interface-11.idl")?.readText()!!
-//		val model = Funghi().parse(fileContent, "input-interface-11.idl")
-//		val fileContentWithoutCommentsFormattedToOurLiking = """"""
-//
-//		assert(fileContentWithoutCommentsFormattedToOurLiking == model.toString()) {
-//			println(fileContentWithoutCommentsFormattedToOurLiking)
-//			println("---")
-//			println(model.toString())
-//		}
-//	}
+	@Test
+	fun `Should manage to use IdlModel toString for testing typedef file no 11`() {
+		val fileContent = this::class.java.classLoader.getResource("input-interface-11.idl")?.readText()!!
+		val model = Funghi().parse(fileContent, "input-interface-11.idl")
+		val fileContentWithoutCommentsFormattedToOurLiking = """interface A {
+	constructor(optional (double or float) a);
+
+	(double or float) operationA(optional A a, optional double b);
+	(bigint or byte) operationB(optional (A or double or float?) a, double b);
+	(bigint or byte?) operationC();
+	(bigint or byte)? operationD();
+	float operationE((float or double or bigint)? a);
+
+};"""
+
+		assert(fileContentWithoutCommentsFormattedToOurLiking == model.toString()) {
+			println(fileContentWithoutCommentsFormattedToOurLiking)
+			println("---")
+			println(model.toString())
+		}
+	}
 }

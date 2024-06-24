@@ -5,5 +5,8 @@ interface A {
 
 	(double or float) operationA(optional A a, optional double b);
 	(bigint or byte) operationB(optional (A or double or float?) a, double b);
-	float operationC((float or double or bigint)? a);
+	(bigint or byte?) operationC();
+	(bigint or byte)? operationD();
+	float operationE((float or double or bigint)? a);
+
 };

@@ -17,7 +17,14 @@ class IdlOperation(builder: IdlOperationBuilder): IdlMember() {
 		val returns =
 			if (returnTypes.size == 1) "${returnTypes[0]}"
 			else if (returnTypes.isEmpty()) ""
-			else returnTypes.joinToString(",", "(", ")")
+			else if (returnTypes.all { it.isNullable }) {
+				val unionTypes = returnTypes
+					.joinToString(" or ", "(", ")")
+					.replace("?", "")
+
+				"$unionTypes?"
+			}
+			else returnTypes.joinToString(" or ", "(", ")")
 
 		return "$void$undefined$returns $name${arguments.joinToString(", ", "(", ")")};"
 	}
