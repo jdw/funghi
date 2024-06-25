@@ -11,8 +11,6 @@ class IdlArgumentBuilder: IdlFragmentBuilder() {
 	var isOptional = false
 
 	override fun puzzle(pieces: Pieces) {
-		//pieces popStartScope ARGUMENT
-
 		isOptional = pieces popIfPresent "optional"
 
 		var weHaveAnotherUnionType = pieces popIfPresentStartScope Scope.UNION_TYPE
@@ -36,7 +34,5 @@ class IdlArgumentBuilder: IdlFragmentBuilder() {
 		}
 
 		name = pieces pop Glob.parserSettings!!.identifierRegex()
-
-		//pieces popEndScope ARGUMENT
 	}
 }

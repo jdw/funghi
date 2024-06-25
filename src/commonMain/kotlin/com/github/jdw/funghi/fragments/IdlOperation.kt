@@ -7,8 +7,8 @@ class IdlOperation(builder: IdlOperationBuilder): IdlMember() {
 	//val extendedAttributes: Set<IdlExtendedAttribute>?
 	val isVoid = builder.isVoid
 	val isUndefined = builder.isUndefined
-	val returnTypes = builder.returnTypes
-	val arguments = builder.arguments
+	val returnTypes = builder.returnTypes.toList()
+	val arguments = builder.arguments.toList()
 
 
 	override fun toString(): String {

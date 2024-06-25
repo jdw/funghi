@@ -252,6 +252,18 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 				continue
 			}
 
+
+			if (line.contains("getter") || line.contains("setter") || line.contains("deleter")) {
+				val newLine = line
+				//.replace("(", "( ")
+				//.replace(")", " )")
+				//.replace(");", " );")
+				//.replace(",", " ,")
+				ret += "${Scope.OPERATION.startScopeKeyword()} $newLine ${Scope.OPERATION.endScopeKeyword()}"
+
+				continue
+			}
+
 			if (line.contains("};")) {
 				if (null == currentScope) throws()
 				ret += when (currentScope) {
@@ -262,17 +274,6 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 						.replace("\",", "\" , ")
 					else -> throws()
 				}
-
-				continue
-			}
-
-			if (line.contains("getter") || line.contains("setter") || line.contains("deleter")) {
-				val newLine = line
-				//.replace("(", "( ")
-				//.replace(")", " )")
-				//.replace(");", " );")
-				//.replace(",", " ,")
-				ret += "${Scope.OPERATION.startScopeKeyword()} $newLine ${Scope.OPERATION.endScopeKeyword()}"
 
 				continue
 			}
@@ -310,9 +311,13 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 				}
 			}
 
-			if (line.contains("=")) {
-				if (line.contains("const")) ret += "${Scope.CONST_ATTRIBUTE.startScopeKeyword()} $line ${Scope.CONST_ATTRIBUTE.endScopeKeyword()}"
-				else ret += "${Scope.DICTIONARY_MEMBER.startScopeKeyword()} $line ${Scope.DICTIONARY_MEMBER.endScopeKeyword()}"
+			if (line.contains("const") && line.contains("=") && currentScope == Scope.INTERFACE) {
+				val newLine = line
+					.replace("const", "")
+					.replace("=", "")
+					.replace(";", " ;")
+
+				ret += "${Scope.CONSTANT_ATTRIBUTE.startScopeKeyword()} $newLine ${Scope.CONSTANT_ATTRIBUTE.endScopeKeyword()}"
 
 				continue
 			}
@@ -325,7 +330,6 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 
 			line.endsWith(";")
 				.echt {
-					//println("--- $line")
 					when (currentScope) {
 						Scope.ATTRIBUTE -> {
 							ret += "${line.replace(";", "")} ${Scope.ATTRIBUTE.endScopeKeyword()}"
