@@ -51,7 +51,9 @@ class IdlInterface(builder: IdlInterfaceBuilder): IdlFragment {
 	val operations = builder.operations.toSet().toTypedArray()
 	val attributes = builder.attributes.toSet().toTypedArray()
 	val extendedAttributes = builder.extendedAttributes.toList()
-	val constantAttribute = builder.constantAttributes.toSet().toTypedArray()
+	val constantAttributes = builder.constantAttributes.toSet().toTypedArray()
+	val specialOperations = builder.specialOperations.toSet().toTypedArray()
+
 
 	override fun toString(): String {
 		var ret = if (extendedAttributes.isNotEmpty()) extendedAttributes.joinToString(prefix = "[", separator = ", ", postfix = "]") + "\n" else ""
@@ -67,7 +69,9 @@ class IdlInterface(builder: IdlInterfaceBuilder): IdlFragment {
 		attributes.forEach { ret += "\t$it\n" }
 		//TODO if (attributes.isNotEmpty()) ret += "\n"
 
-		constantAttribute.forEach { ret += "\t$it\n" }
+		constantAttributes.forEach { ret += "\t$it\n" }
+
+		specialOperations.forEach { ret += "\t$it\n" }
 
 		return "$ret};"
 	}

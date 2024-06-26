@@ -237,6 +237,8 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 			}
 
 			if (line.contains("constructor(")) {
+				if (currentScope != Scope.INTERFACE) throws()
+
 				val newLine = if (line.contains("constructor();"))
 					line // No arguments!
 						.replace("constructor();", "constructor ${Scope.ARGUMENTS.startScopeKeyword()} ${Scope.ARGUMENTS.endScopeKeyword()} ")
@@ -253,13 +255,29 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 			}
 
 
-			if (line.contains("getter") || line.contains("setter") || line.contains("deleter")) {
+			// Special operations
+			val operationsValues = Glob
+				.parserSettings!!
+				.operationRegex()
+				.find(line)
+				?.groupValues
+				?: emptyList()
+			if ((line.contains("getter") || line.contains("setter") || line.contains("deleter")) &&
+				operationsValues.isEmpty()
+				//!line.matches(Glob.parserSettings!!.operationRegex())
+				//line.contains(" (")
+				) {
+				if (currentScope != Scope.INTERFACE) throws()
+				if (line.contains("...")) throws() // SpecOps can not be variadic
+				if (line.contains("optional")) throws() // SpecOps can have optional arguments
+				if (line.split("(").size != 2) throws() // SpecOps can not have union types //TODO Find out if true
+
 				val newLine = line
-				//.replace("(", "( ")
-				//.replace(")", " )")
-				//.replace(");", " );")
-				//.replace(",", " ,")
-				ret += "${Scope.OPERATION.startScopeKeyword()} $newLine ${Scope.OPERATION.endScopeKeyword()}"
+					.replace(";", "")
+					.replace("(", " ${Scope.ARGUMENTS.startScopeKeyword()} ${Scope.ARGUMENT.startScopeKeyword()} ")
+					.replace(")", " ${Scope.ARGUMENT.endScopeKeyword()} ${Scope.ARGUMENTS.endScopeKeyword()} ")
+					.replace(",", " ${Scope.ARGUMENT.nextScopeKeyword()} ")
+				ret += "${Scope.SPECIAL_OPERATION.startScopeKeyword()} $newLine ${Scope.SPECIAL_OPERATION.endScopeKeyword()}"
 
 				continue
 			}
@@ -278,7 +296,7 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 				continue
 			}
 
-			if (line.contains("(") &&
+			if (line.contains("(") && //TODO matches operationRegex
 				!line.contains("constructor") &&
 				currentScope == Scope.INTERFACE) {
 				val values = Glob

@@ -6,12 +6,14 @@ import com.github.jdw.funghi.fragments.IdlConstantAttribute
 import com.github.jdw.funghi.fragments.IdlExtendedAttribute
 import com.github.jdw.funghi.fragments.IdlOperation
 import com.github.jdw.funghi.fragments.IdlOperationConstructor
+import com.github.jdw.funghi.fragments.IdlSpecialOperation
 import com.github.jdw.funghi.pieces.Pieces
 import com.github.jdw.funghi.pieces.Scope.ATTRIBUTE
 import com.github.jdw.funghi.pieces.Scope.CONSTANT_ATTRIBUTE
 import com.github.jdw.funghi.pieces.Scope.INTERFACE
 import com.github.jdw.funghi.pieces.Scope.OPERATION
 import com.github.jdw.funghi.pieces.Scope.OPERATION_CONSTRUCTOR
+import com.github.jdw.funghi.pieces.Scope.SPECIAL_OPERATION
 import throws
 
 class IdlInterfaceBuilder(extendAttributes: List<IdlExtendedAttribute>) : IdlFragmentBuilder() {
@@ -24,6 +26,7 @@ class IdlInterfaceBuilder(extendAttributes: List<IdlExtendedAttribute>) : IdlFra
 	val attributes: MutableSet<IdlAttribute> = mutableSetOf() //TODO Test uniqueness of names
 	val extendedAttributes = extendAttributes.toMutableList()
 	val constantAttributes = mutableSetOf<IdlConstantAttribute>()
+	val specialOperations = mutableSetOf<IdlSpecialOperation>()
 
 
 	override fun puzzle(pieces: Pieces) {
@@ -40,6 +43,7 @@ class IdlInterfaceBuilder(extendAttributes: List<IdlExtendedAttribute>) : IdlFra
 				ATTRIBUTE -> attributes += IdlAttribute(IdlAttributeBuilder().apply { thus puzzle pieces })
 				OPERATION -> operations += IdlOperation(IdlOperationBuilder().apply { thus puzzle pieces })
 				CONSTANT_ATTRIBUTE -> constantAttributes += IdlConstantAttribute(IdlConstantAttributeBuilder().apply { thus puzzle pieces })
+				SPECIAL_OPERATION -> specialOperations += IdlSpecialOperation(IdlSpecialOperationBuilder().apply { thus puzzle pieces })
 				else -> thus throwing objection
 			}
 		}

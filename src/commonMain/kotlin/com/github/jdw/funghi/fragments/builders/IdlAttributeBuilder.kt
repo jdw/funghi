@@ -13,10 +13,11 @@ class IdlAttributeBuilder: IdlMemberBuilder() {
 	val types = mutableListOf<IdlType>()
 	var name: String? = null
 
+
 	override fun puzzle(pieces: Pieces) {
 		pieces popStartScope ATTRIBUTE
-		pieces pop "attribute"
 		isReadonly = pieces popIfPresent "readonly"
+		pieces pop "attribute"
 		isUnrestricted = pieces popIfPresent "unrestricted"
 
 		if (pieces.peekIsSingleType()) {

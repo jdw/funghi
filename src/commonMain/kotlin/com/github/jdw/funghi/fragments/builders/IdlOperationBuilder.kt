@@ -14,12 +14,26 @@ class IdlOperationBuilder: IdlMemberBuilder() {
 	var name: String? = null
 	val returnTypes = mutableListOf<IdlType>()
 	val arguments = mutableListOf<IdlArgument>()
+	var isGetter = false
+	var isSetter = false
+	var isDeleter = false
+
 
 	override fun puzzle(pieces: Pieces) {
 		pieces popStartScope OPERATION
 
+		isGetter = pieces popIfPresent "getter"
+		isSetter = pieces popIfPresent "setter"
+		isDeleter = pieces popIfPresent "deleter"
+
+		if (isGetter && (isSetter || isDeleter)) throws()
+		if (isSetter && (isGetter || isDeleter)) throws()
+		if (isDeleter && (isGetter || isSetter)) throws()
+
 		isVoid = pieces popIfPresent "void"
 		isUndefined = pieces popIfPresent "undefined"
+
+		//if (isGetter && (isVoid || isUndefined)) throws() //TODO Find out
 
 		if (!(isVoid || isUndefined)) {
 			if (pieces.peekIsSingleType()) {

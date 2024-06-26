@@ -1,0 +1,22 @@
+// Testing getter and setter and deleter
+
+// From https://webidl.spec.whatwg.org/#idl-special-operations
+[Exposed=Window]
+interface Dictionary {
+  readonly attribute unsigned long propertyCount;
+
+  getter double (DOMString propertyName);
+  setter undefined (DOMString propertyName, double propertyValue);
+  deleter undefined (DOMString propertyName);
+};
+
+// From html.idl
+[Exposed=Window]
+interface Storage {
+  readonly attribute unsigned long length;
+  DOMString? key(unsigned long index);
+  getter DOMString? getItem(DOMString key);
+  setter undefined setItem(DOMString key, DOMString value);
+  deleter undefined removeItem(DOMString key);
+  undefined clear();
+};

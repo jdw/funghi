@@ -9,9 +9,16 @@ class IdlOperation(builder: IdlOperationBuilder): IdlMember() {
 	val isUndefined = builder.isUndefined
 	val returnTypes = builder.returnTypes.toList()
 	val arguments = builder.arguments.toList()
+	val isGetter = builder.isGetter
+	val isSetter = builder.isSetter
+	val isDeleter = builder.isDeleter
 
 
 	override fun toString(): String {
+		val getter = if (isGetter) "getter " else ""
+		val setter = if (isSetter) "setter " else ""
+		val deleter = if (isDeleter) "deleter " else ""
+
 		val void = if (isVoid) "void" else ""
 		val undefined = if (isUndefined) "undefined" else ""
 		val returns =
@@ -26,6 +33,6 @@ class IdlOperation(builder: IdlOperationBuilder): IdlMember() {
 			}
 			else returnTypes.joinToString(" or ", "(", ")")
 
-		return "$void$undefined$returns $name${arguments.joinToString(", ", "(", ")")};"
+		return "$getter$setter$deleter$void$undefined$returns $name${arguments.joinToString(", ", "(", ")")};"
 	}
 }

@@ -4,7 +4,6 @@ import Glob
 import com.github.jdw.funghi.fragments.IdlType
 import com.github.jdw.funghi.pieces.Pieces
 import com.github.jdw.funghi.pieces.Scope
-import noop
 
 class IdlTypedefBuilder: IdlFragmentBuilder() {
 	val types = mutableListOf<IdlType>()
