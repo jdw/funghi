@@ -14,3 +14,10 @@ as in an actual browser!
 * [WebIDLpedia](https://dontcallmedom.github.io/webidlpedia/)
 * [The *living* standard WebIDL](https://webidl.spec.whatwg.org/)
 * [Worn and torn Regexr](https://regexr.com/)
+
+## Questions to the standard
+* Can dictionary members be union types?
+* Can getters be defined using unnion type as return type?
+* Can getter/setter/deleter arguments use union types?
+* Can an identifier be the value of a keyword? (ex. an operation named "any" or a dictionary named "interface" or "getter")
+* Can default values be a string consisting of whitespace characters that is defined by not using an escape sequence? (any combination of space, new line, return, tab, ...)

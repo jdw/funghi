@@ -18,7 +18,7 @@ class IdlSpecialOperationBuilder: IdlFragmentBuilder() {
 
 
 	override fun puzzle(pieces: Pieces) {
-		pieces popStartScope SPECIAL_OPERATION
+		pieces pop SPECIAL_OPERATION.startScopeKeyword()
 
 		isGetter = pieces popIfPresent "getter"
 		isSetter = pieces popIfPresent "setter"
@@ -28,18 +28,17 @@ class IdlSpecialOperationBuilder: IdlFragmentBuilder() {
 
 		returnType = IdlType(IdlTypeBuilder().apply { thus puzzle pieces })
 
-		pieces popStartScope ARGUMENTS
-		pieces popStartScope ARGUMENT
+		pieces pop ARGUMENTS.startScopeKeyword()
+		pieces pop ARGUMENT.startScopeKeyword()
 
 		var weHaveAnotherArgument = true // SpecOps must have at least one arg
 		while (weHaveAnotherArgument) {
 			arguments += IdlArgument(IdlArgumentBuilder().apply { thus puzzle pieces })
-			weHaveAnotherArgument = pieces popIfPresentNextScope ARGUMENT
+			weHaveAnotherArgument = pieces popIfPresent ARGUMENT.nextScopeKeyword()
 		}
 
-		pieces popEndScope ARGUMENT
-		pieces popEndScope ARGUMENTS
-
-		pieces popEndScope SPECIAL_OPERATION
+		pieces pop ARGUMENT.stopScopeKeyword()
+		pieces pop ARGUMENTS.stopScopeKeyword()
+		pieces pop SPECIAL_OPERATION.stopScopeKeyword()
 	}
 }

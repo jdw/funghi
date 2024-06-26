@@ -3,7 +3,7 @@ package com.github.jdw.funghi.fragments.builders
 import Glob
 import com.github.jdw.funghi.fragments.IdlType
 import com.github.jdw.funghi.pieces.Pieces
-import com.github.jdw.funghi.pieces.Scope
+import com.github.jdw.funghi.pieces.Scope.UNION_TYPE
 
 class IdlArgumentBuilder: IdlFragmentBuilder() {
 	var name: String? = null
@@ -13,15 +13,15 @@ class IdlArgumentBuilder: IdlFragmentBuilder() {
 	override fun puzzle(pieces: Pieces) {
 		isOptional = pieces popIfPresent "optional"
 
-		var weHaveAnotherUnionType = pieces popIfPresentStartScope Scope.UNION_TYPE
+		var weHaveAnotherUnionType = pieces popIfPresent UNION_TYPE.startScopeKeyword()
 		if (weHaveAnotherUnionType) {
 			val unionTypes = mutableListOf<IdlTypeBuilder>()
 			while (weHaveAnotherUnionType) {
 				unionTypes += IdlTypeBuilder().apply { thus puzzle pieces }
-				weHaveAnotherUnionType = pieces popIfPresentNextScope Scope.UNION_TYPE
+				weHaveAnotherUnionType = pieces popIfPresent UNION_TYPE.nextScopeKeyword()
 			}
 
-			pieces popEndScope Scope.UNION_TYPE
+			pieces pop UNION_TYPE.stopScopeKeyword()
 
 			if (pieces popIfPresent "?") {
 				unionTypes.forEach { it.isNullable = true }

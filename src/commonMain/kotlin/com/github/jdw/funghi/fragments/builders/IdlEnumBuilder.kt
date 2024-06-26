@@ -1,7 +1,8 @@
 package com.github.jdw.funghi.fragments.builders
 
+import Glob
 import com.github.jdw.funghi.pieces.Pieces
-import com.github.jdw.funghi.pieces.Scope
+import com.github.jdw.funghi.pieces.Scope.ENUM
 import throws
 
 class IdlEnumBuilder: IdlFragmentBuilder() {
@@ -9,7 +10,7 @@ class IdlEnumBuilder: IdlFragmentBuilder() {
 	val values = mutableSetOf<String>()
 
 	override fun puzzle(pieces: Pieces) {
-		pieces popStartScope Scope.ENUM
+		pieces pop ENUM.startScopeKeyword()
 
 		name = pieces pop Glob.parserSettings!!.identifierRegex()
 
@@ -26,7 +27,7 @@ class IdlEnumBuilder: IdlFragmentBuilder() {
 			weHaveAnotherValue = pieces popIfPresent ","
 		}
 
-		pieces popEndScope Scope.ENUM
+		pieces pop ENUM.stopScopeKeyword()
 	}
 
 }

@@ -30,7 +30,7 @@ class IdlInterfaceBuilder(extendAttributes: List<IdlExtendedAttribute>) : IdlFra
 
 
 	override fun puzzle(pieces: Pieces) {
-		pieces popStartScope INTERFACE
+		pieces pop INTERFACE.startScopeKeyword()
 		isPartial = pieces popIfPresent "partial"
 		pieces pop "interface"
 		isMixin = pieces popIfPresent "mixin"
@@ -48,7 +48,7 @@ class IdlInterfaceBuilder(extendAttributes: List<IdlExtendedAttribute>) : IdlFra
 			}
 		}
 
-		pieces popEndScope INTERFACE
+		pieces pop INTERFACE.stopScopeKeyword()
 	}
 
 

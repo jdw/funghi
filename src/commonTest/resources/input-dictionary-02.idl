@@ -1,0 +1,26 @@
+// All below found in html.idl
+dictionary ImageBitmapOptions {
+  ImageOrientation imageOrientation = "from-image";
+  PremultiplyAlpha premultiplyAlpha = "default";
+  ColorSpaceConversion colorSpaceConversion = "default";
+  [EnforceRange] unsigned long resizeWidth;
+  [EnforceRange] unsigned long resizeHeight;
+  ResizeQuality resizeQuality = "low";
+};
+
+dictionary GetHTMLOptions {
+  boolean serializableShadowRoots = false;
+  sequence<ShadowRoot> shadowRoots = [];
+};
+
+dictionary MessageEventInit : EventInit {
+  any data = null;
+  USVString origin = "";
+  DOMString lastEventId = "";
+  MessageEventSource? source = null;
+  sequence<MessagePort> ports = [];
+};
+
+dictionary StructuredSerializeOptions {
+  sequence<object> transfer = [];
+};

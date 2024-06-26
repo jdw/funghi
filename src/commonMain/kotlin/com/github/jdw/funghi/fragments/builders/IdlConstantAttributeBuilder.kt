@@ -3,7 +3,7 @@ package com.github.jdw.funghi.fragments.builders
 import Glob
 import com.github.jdw.funghi.fragments.IdlType
 import com.github.jdw.funghi.pieces.Pieces
-import com.github.jdw.funghi.pieces.Scope
+import com.github.jdw.funghi.pieces.Scope.CONSTANT_ATTRIBUTE
 import throws
 
 
@@ -54,13 +54,13 @@ class IdlConstantAttributeBuilder: IdlFragmentBuilder() {
 
 
 	override fun puzzle(pieces: Pieces) {
-		pieces popStartScope Scope.CONSTANT_ATTRIBUTE
+		pieces pop CONSTANT_ATTRIBUTE.startScopeKeyword()
 
 		type = IdlType(IdlTypeBuilder().apply { thus puzzle pieces })
 		identifier = pieces pop 1
 		value = pieces pop 1
 		pieces pop ";"
 
-		pieces popEndScope Scope.CONSTANT_ATTRIBUTE
+		pieces pop CONSTANT_ATTRIBUTE.stopScopeKeyword()
 	}
 }

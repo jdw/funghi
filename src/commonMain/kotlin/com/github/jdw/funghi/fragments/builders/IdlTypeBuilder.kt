@@ -1,8 +1,9 @@
 package com.github.jdw.funghi.fragments.builders
 
 import com.github.jdw.funghi.pieces.Pieces
-import com.github.jdw.funghi.pieces.Scope
+import com.github.jdw.funghi.pieces.Scope.SEQUENCE
 import echt
+
 
 /**
  * This section lists the types supported by Web IDL, the set of values or Infra type corresponding
@@ -19,10 +20,10 @@ class IdlTypeBuilder: IdlFragmentBuilder() {
 
 
 	override infix fun puzzle(pieces: Pieces) {
-		if (pieces popIfPresentStartScope Scope.SEQUENCE) {
+		if (pieces popIfPresent SEQUENCE.startScopeKeyword()) {
 			isSequence = true
 			name = pieces.popType()
-			pieces popEndScope Scope.SEQUENCE
+			pieces pop SEQUENCE.stopScopeKeyword()
 		}
 		else {
 			name = pieces.popType()

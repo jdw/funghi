@@ -1,10 +1,12 @@
 package com.github.jdw.funghi.fragments.builders
 
+import Glob
 import com.github.jdw.funghi.fragments.IdlArgument
 import com.github.jdw.funghi.fragments.IdlExtendedAttribute
-import com.github.jdw.funghi.pieces.Scope.EXTENDED_ATTRIBUTE
 import com.github.jdw.funghi.pieces.Pieces
-import com.github.jdw.funghi.pieces.Scope
+import com.github.jdw.funghi.pieces.Scope.ARGUMENT
+import com.github.jdw.funghi.pieces.Scope.EXTENDED_ATTRIBUTE
+import com.github.jdw.funghi.pieces.Scope.EXTENDED_ATTRIBUTE_LIST
 
 class IdlExtendedAttributeBuilder: IdlFragmentBuilder() {
 	var name: String? = null
@@ -17,7 +19,7 @@ class IdlExtendedAttributeBuilder: IdlFragmentBuilder() {
 		type = IdlExtendedAttribute.Type.NO_ARGS
 
 		if (pieces popIfPresent "=") {
-			if (pieces popIfPresent Scope.EXTENDED_ATTRIBUTE_LIST.startScopeKeyword()) {
+			if (pieces popIfPresent EXTENDED_ATTRIBUTE_LIST.startScopeKeyword()) {
 				type = IdlExtendedAttribute.Type.IDENT_LIST
 				var weHaveAnotherIdentifier = true
 				while (weHaveAnotherIdentifier) {
@@ -25,7 +27,7 @@ class IdlExtendedAttributeBuilder: IdlFragmentBuilder() {
 					weHaveAnotherIdentifier = pieces popIfPresent ","
 				}
 
-				pieces pop Scope.EXTENDED_ATTRIBUTE_LIST.endScopeKeyword()
+				pieces pop EXTENDED_ATTRIBUTE_LIST.stopScopeKeyword()
 			}
 			else if (pieces peek Glob.parserSettings!!.identifierRegex()) {
 				identifiers += pieces pop Glob.parserSettings!!.identifierRegex()
@@ -34,14 +36,14 @@ class IdlExtendedAttributeBuilder: IdlFragmentBuilder() {
 					type = IdlExtendedAttribute.Type.NAMED_ARG_LIST
 					pieces pop "("
 
-					var weHaveAnotherArgument = pieces popIfPresentStartScope Scope.ARGUMENT
+					var weHaveAnotherArgument = pieces popIfPresent ARGUMENT.startScopeKeyword()
 					while (weHaveAnotherArgument) {
 						arguments += IdlArgument(IdlArgumentBuilder().apply { thus puzzle pieces })
 
 						weHaveAnotherArgument = pieces popIfPresent ","
 					}
 
-					pieces popIfPresentEndScope Scope.ARGUMENT
+					pieces popIfPresent ARGUMENT.stopScopeKeyword()
 					pieces pop ")"
 				}
 				else {
@@ -60,7 +62,7 @@ class IdlExtendedAttributeBuilder: IdlFragmentBuilder() {
 
 	companion object {
 		infix fun puzzleMultiple(pieces: Pieces): List<IdlExtendedAttribute> {
-			pieces popStartScope EXTENDED_ATTRIBUTE
+			pieces pop EXTENDED_ATTRIBUTE.startScopeKeyword()
 			var weHaveAnotherExtendedAttribute = true
 			val ret = mutableListOf<IdlExtendedAttribute>()
 
@@ -69,7 +71,7 @@ class IdlExtendedAttributeBuilder: IdlFragmentBuilder() {
 				weHaveAnotherExtendedAttribute = pieces popIfPresent ","
 			}
 
-			pieces popEndScope EXTENDED_ATTRIBUTE
+			pieces pop EXTENDED_ATTRIBUTE.stopScopeKeyword()
 
 			return ret
 		}

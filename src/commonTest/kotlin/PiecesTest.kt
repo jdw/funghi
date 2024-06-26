@@ -13,7 +13,7 @@ class PiecesTest {
 			val pieces = Pieces(PiecesBuilder(allKeywords))
 
 			version.allPredefinedTypesKeywords().forEach { _ ->
-				val (result, value) = pieces.popIfPresentSingleTypeThrowIfNot()
+				val (result, value) = pieces.popIfPresentType()
 
 				assert(result)
 				assert(version.allPredefinedTypesKeywords().contains(value)) {
@@ -43,7 +43,7 @@ class PiecesTest {
 			val pieces = Pieces(PiecesBuilder(allKeywords))
 
 			version.allPredefinedTypesKeywords().forEach { _ ->
-				val (result, value) = pieces.popIfPresentSingleTypeThrowIfNot()
+				val (result, value) = pieces.popIfPresentType()
 
 				assert(result)
 				assert(version.allPredefinedTypesKeywords().containsRemoveMarkers(value)) {
@@ -73,7 +73,7 @@ class PiecesTest {
 			val pieces = Pieces(PiecesBuilder(allKeywords))
 
 			version.allPredefinedTypesKeywords().forEach { _ ->
-				val (result, value) = pieces.popIfPresentSingleTypeThrowIfNot()
+				val (result, value) = pieces.popIfPresentType()
 
 				assert(result)
 				assert(version.allPredefinedTypesKeywords().containsRemoveMarkers(value)) {
@@ -105,8 +105,7 @@ class PiecesTest {
 			val pieces = Pieces(PiecesBuilder(allKeywords))
 
 			version.allPredefinedTypesKeywords().forEach { keywords ->
-
-				val (result, value) = pieces.popIfPresentSingleTypeThrowIfNot()
+				val (result, value) = pieces.popIfPresentType()
 
 				assert(result)
 				assert(version.allPredefinedTypesKeywords().containsRemoveMarkers(value)) {
@@ -130,7 +129,7 @@ class PiecesTest {
 				val peekResult = pieces.peekIsSingleType()
 				assert(peekResult)
 
-				val (popResult, value) = pieces.popIfPresentSingleTypeThrowIfNot()
+				val (popResult, value) = pieces.popIfPresentType()
 				assert(popResult && allKeywords.contains(value)) {
 					println(allKeywords)
 					println()
@@ -163,7 +162,9 @@ class PiecesTest {
 					val peekResult = pieces.peekIsSingleType()
 					assert(peekResult)
 
-					val (popResult, value) = pieces.popIfPresentSingleTypeThrowIfNot()
+					val (popResult, value) = pieces.popIfPresentType()
+
+					assert(popResult)
 					assert(popResult && allKeywords.contains(value) && value.containsArrayMarker()) {
 						println(allKeywords)
 						println()
@@ -201,7 +202,9 @@ class PiecesTest {
 					val peekResult = pieces.peekIsSingleType()
 					assert(peekResult)
 
-					val (popResult, value) = pieces.popIfPresentSingleTypeThrowIfNot()
+					val (popResult, value) = pieces.popIfPresentType()
+
+					assert(popResult)
 					assert(popResult && allKeywords.contains(value) && value.containsNullableMarker()) {
 						println(allKeywords)
 						println()
@@ -241,7 +244,9 @@ class PiecesTest {
 						val peekResult = pieces.peekIsSingleType()
 						assert(peekResult)
 
-						val (popResult, value) = pieces.popIfPresentSingleTypeThrowIfNot()
+						val (popResult, value) = pieces.popIfPresentType()
+
+						assert(popResult)
 						assert(popResult && allKeywords.contains(value) && value.containsArrayMarker()) {
 							println(allKeywords)
 							println()

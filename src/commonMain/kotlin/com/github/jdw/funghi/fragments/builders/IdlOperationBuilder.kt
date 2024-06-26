@@ -1,12 +1,16 @@
 package com.github.jdw.funghi.fragments.builders
 
+import Glob
 import com.github.jdw.funghi.fragments.IdlArgument
-import com.github.jdw.funghi.pieces.Scope.OPERATION
 import com.github.jdw.funghi.fragments.IdlType
 import com.github.jdw.funghi.pieces.Pieces
-import com.github.jdw.funghi.pieces.Scope
+import com.github.jdw.funghi.pieces.Scope.ARGUMENT
+import com.github.jdw.funghi.pieces.Scope.ARGUMENTS
+import com.github.jdw.funghi.pieces.Scope.OPERATION
+import com.github.jdw.funghi.pieces.Scope.UNION_TYPE
 import doch
 import throws
+
 
 class IdlOperationBuilder: IdlMemberBuilder() {
 	var isVoid: Boolean = false
@@ -20,7 +24,7 @@ class IdlOperationBuilder: IdlMemberBuilder() {
 
 
 	override fun puzzle(pieces: Pieces) {
-		pieces popStartScope OPERATION
+		pieces pop OPERATION.startScopeKeyword()
 
 		isGetter = pieces popIfPresent "getter"
 		isSetter = pieces popIfPresent "setter"
@@ -41,15 +45,15 @@ class IdlOperationBuilder: IdlMemberBuilder() {
 			}
 			else {
 				val unionTypes = mutableListOf<IdlTypeBuilder>()
-				var weHaveAnotherUnionType = pieces popIfPresentStartScope Scope.UNION_TYPE
+				var weHaveAnotherUnionType = pieces popIfPresent UNION_TYPE.startScopeKeyword()
 				weHaveAnotherUnionType doch { throws() }
 
 				while (weHaveAnotherUnionType) {
 					unionTypes += IdlTypeBuilder().apply { thus puzzle pieces }
-					weHaveAnotherUnionType = pieces popIfPresentNextScope Scope.UNION_TYPE
+					weHaveAnotherUnionType = pieces popIfPresent UNION_TYPE.nextScopeKeyword()
 				}
 
-				pieces popEndScope Scope.UNION_TYPE
+				pieces pop UNION_TYPE.stopScopeKeyword()
 
 				if (pieces popIfPresent "?") {
 					unionTypes.forEach { it.isNullable = true }
@@ -61,18 +65,18 @@ class IdlOperationBuilder: IdlMemberBuilder() {
 
 		name = pieces pop Glob.parserSettings!!.identifierRegex()
 
-		pieces popStartScope Scope.ARGUMENTS
+		pieces pop ARGUMENTS.startScopeKeyword()
 
-		var weHaveAnotherArgument = pieces popIfPresentStartScope Scope.ARGUMENT
+		var weHaveAnotherArgument = pieces popIfPresent ARGUMENT.startScopeKeyword()
 		while (weHaveAnotherArgument) {
 			arguments += IdlArgument(IdlArgumentBuilder().apply { thus puzzle pieces })
-			weHaveAnotherArgument = pieces popIfPresentNextScope Scope.ARGUMENT
+			weHaveAnotherArgument = pieces popIfPresent ARGUMENT.nextScopeKeyword()
 		}
 
-		pieces popIfPresentEndScope Scope.ARGUMENT
-		pieces popEndScope Scope.ARGUMENTS
+		pieces popIfPresent ARGUMENT.stopScopeKeyword()
+		pieces pop ARGUMENTS.stopScopeKeyword()
 
-		pieces popEndScope OPERATION
+		pieces pop OPERATION.stopScopeKeyword()
 	}
 
 //	infix fun apply(block: () -> Unit): IdlOperationBuilder {

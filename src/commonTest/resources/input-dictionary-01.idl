@@ -1,0 +1,124 @@
+// This file tests basic dictionaries
+
+// Found in webgl1 idl file
+dictionary WebGLContextAttributes {
+    GLboolean alpha = true;
+    GLboolean depth = true;
+    GLboolean stencil=false;
+    GLboolean antialias= true;
+    GLboolean premultipliedAlpha =true;
+    GLboolean preserveDrawingBuffer = false;
+    GLboolean preferLowPowerToHighPerformance = false;
+    GLboolean failIfMajorPerformanceCaveat = false;
+};
+
+// Also found in webgl1 file
+dictionary WebGLContextEventInit : EventInit {
+    DOMString statusMessage;
+};
+
+// All below found in html.idl
+dictionary TrackEventInit : EventInit {
+  (VideoTrack or AudioTrack or TextTrack)? track = null;
+};
+
+dictionary SubmitEventInit : EventInit {
+  HTMLElement? submitter = null;
+};
+
+dictionary FormDataEventInit : EventInit {
+  required FormData formData;
+};
+
+dictionary AssignedNodesOptions {
+  boolean flatten = false;
+};
+
+dictionary CanvasRenderingContext2DSettings {
+  boolean alpha = true;
+  boolean desynchronized = false;
+  PredefinedColorSpace colorSpace = "srgb";
+  boolean willReadFrequently = false;
+};
+
+dictionary ImageEncodeOptions {
+  DOMString type = "image/png";
+  unrestricted double quality;
+};
+
+dictionary ValidityStateFlags {
+  boolean valueMissing = false;
+  boolean typeMismatch = false;
+  boolean patternMismatch = false;
+  boolean tooLong = false;
+  boolean tooShort = false;
+  boolean rangeUnderflow = false;
+  boolean rangeOverflow = false;
+  boolean stepMismatch = false;
+  boolean badInput = false;
+  boolean customError = false;
+};
+
+dictionary ToggleEventInit : EventInit {
+  DOMString oldState = "";
+  DOMString newState = "";
+};
+
+dictionary FocusOptions {
+  boolean preventScroll = false;
+  boolean focusVisible;
+};
+
+dictionary DragEventInit : MouseEventInit {
+  DataTransfer? dataTransfer = null;
+};
+
+dictionary NavigationUpdateCurrentEntryOptions {
+  required any state;
+};
+
+dictionary NavigationOptions {
+  any info;
+};
+
+dictionary NavigationNavigateOptions : NavigationOptions {
+  any state;
+  NavigationHistoryBehavior history = "auto";
+};
+
+dictionary NavigationReloadOptions : NavigationOptions {
+  any state;
+};
+
+dictionary NavigationResult {
+  Promise<NavigationHistoryEntry> committed;
+  Promise<NavigationHistoryEntry> finished;
+};
+
+dictionary NavigateEventInit : EventInit {
+  NavigationType navigationType = "push";
+  required NavigationDestination destination;
+  boolean canIntercept = false;
+  boolean userInitiated = false;
+  boolean hashChange = false;
+  required AbortSignal signal;
+  FormData? formData = null;
+  DOMString? downloadRequest = null;
+  any info;
+  boolean hasUAVisualTransition = false;
+};
+
+dictionary NavigationInterceptOptions {
+  NavigationInterceptHandler handler;
+  NavigationFocusReset focusReset;
+  NavigationScrollBehavior scroll;
+};
+
+dictionary ErrorEventInit : EventInit {
+  DOMString message = "";
+  USVString filename = "";
+  unsigned long lineno = 0;
+  unsigned long colno = 0;
+  any error;
+};
+

@@ -82,7 +82,5 @@ import com.github.jdw.funghi.fragments.builders.IdlDictionaryBuilder
  * @author Johannes Alexis Wirde
  */
 class IdlDictionary(builder: IdlDictionaryBuilder): IdlFragment {
-	companion object {
-		val TYPE = IdlFragment.Type.DICTIONARY
-	}
+
 }

@@ -53,7 +53,6 @@ open class PiecesHolder {
 	fun peek(): String {
 		popUntilNotLineNumber()
 
-		pieces.isEmpty() echt { throws() }
 		(pieces.size < currentIdx) echt { throws() }
 
 		return pieces[currentIdx]
@@ -63,7 +62,6 @@ open class PiecesHolder {
 	infix fun peek(pattern: Regex): Boolean {
 		popUntilNotLineNumber()
 
-		pieces.isEmpty() echt { throws() }
 		(pieces.size < currentIdx) echt { throws() }
 
 		return pieces[currentIdx] matches pattern
@@ -73,17 +71,9 @@ open class PiecesHolder {
 	infix fun peek(value: String): Boolean {
 		popUntilNotLineNumber()
 
-		pieces.isEmpty() echt { throws() }
 		(pieces.size < currentIdx) echt { throws() }
 
 		return pieces[currentIdx] == value
-	}
-
-
-	fun peekEndScope(): Boolean {
-		popUntilNotLineNumber()
-
-		return pieces[currentIdx].startsWith(Glob.endScopeKeyword)
 	}
 
 
@@ -121,20 +111,9 @@ open class PiecesHolder {
 	}
 
 
-	infix fun peekIsSingleType(block: (Boolean) -> Unit) {
-		popUntilNotLineNumber()
-
-		pieces.isEmpty() echt { throws() }
-		(pieces.size < currentIdx) echt { throws() }
-
-		block.invoke(peekIsSingleType())
-	}
-
-
 	fun peekIsStartScope(): Boolean {
 		popUntilNotLineNumber()
 
-		pieces.isEmpty() echt { throws() }
 		(pieces.size < currentIdx) echt { throws() }
 
 		return pieces[currentIdx].startsWith(Glob.startScopeKeyword)
@@ -144,7 +123,6 @@ open class PiecesHolder {
 	fun peekStartScope(): Scope {
 		popUntilNotLineNumber()
 
-		pieces.isEmpty() echt { throws() }
 		(pieces.size < currentIdx) echt { throws() }
 
 		pieces[currentIdx].startsWith(Glob.startScopeKeyword) doch { throws() }
@@ -213,20 +191,6 @@ open class PiecesHolder {
 	}
 
 
-	infix fun popEndScope(scope: Scope) {
-		popUntilNotLineNumber()
-
-		(pieces[currentIdx].startsWith(Glob.endScopeKeyword))
-			.echt {
-				val value = Scope.valueOf(pieces[currentIdx].replace(Glob.endScopeKeyword, ""))
-				(value == scope)
-					.echt { thus pop 1 }
-					.doch { throws("value" to value, "scope" to scope) }
-			}
-			.doch {	throws() }
-	}
-
-
 	infix fun popIfPresent(value: String): Boolean {
 		popUntilNotLineNumber()
 
@@ -238,40 +202,6 @@ open class PiecesHolder {
 		popUntilNotLineNumber()
 
 		return (pieces[currentIdx] matches pattern) echt { takeAStep() }
-	}
-
-
-	infix fun popIfPresentStartScope(scope: Scope): Boolean {
-		popUntilNotLineNumber()
-
-		return if (peek(scope.startScopeKeyword())) {
-				pop(1)
-				true
-			}
-			else false
-
-	}
-
-
-	infix fun popIfPresentNextScope(scope: Scope): Boolean {
-		popUntilNotLineNumber()
-
-		return if (peek(scope.nextScopeKeyword())) {
-			pop(1)
-			true
-		}
-		else false
-	}
-
-
-	infix fun popIfPresentEndScope(scope: Scope): Boolean {
-		popUntilNotLineNumber()
-
-		return if (peek(scope.endScopeKeyword())) {
-			pop(1)
-			true
-		}
-		else false
 	}
 
 
@@ -339,17 +269,6 @@ open class PiecesHolder {
 	}
 
 
-	fun popIfPresentSingleTypeThrowIfNot(): Pair<Boolean, String> { //TODO remove
-		popUntilNotLineNumber()
-
-		val ret = popIfPresentType()
-
-		ret.first doch { throws() }
-
-		return ret
-	}
-
-
 	fun popType(): String {
 		popUntilNotLineNumber()
 
@@ -358,25 +277,6 @@ open class PiecesHolder {
 		ret.first doch { throws() }
 
 		return ret.second
-	}
-
-
-	infix fun popStartScope(scope: Scope) {
-		popUntilNotLineNumber()
-
-		(pieces[currentIdx].startsWith(Glob.startScopeKeyword))
-			.echt {
-				val foundScope = Scope.valueOf(pieces[currentIdx].replace(Glob.startScopeKeyword, ""))
-
-				(foundScope == scope)
-					.echt {
-						takeAStep()
-					}
-					.doch { throws() }
-			}
-			.doch {
-				throws()
-			}
 	}
 
 

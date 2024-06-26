@@ -1,27 +1,27 @@
 package com.github.jdw.funghi.pieces
 
 enum class Scope {
-	TYPEDEF,
-	DICTIONARY,
-	INTERFACE,
-	ENUM,
+	ARGUMENT,
+	ARGUMENTS,
 	ATTRIBUTE,
+	CONSTANT_ATTRIBUTE,
+	DICTIONARY,
+	DICTIONARY_MEMBER,
+	ENUM,
+	EXTENDED_ATTRIBUTE,
+	EXTENDED_ATTRIBUTE_LIST,
+	INCLUDES,
+	INTERFACE,
+	MODEL,
+	MULTI_TYPE,
 	OPERATION,
 	OPERATION_CONSTRUCTOR,
-	INCLUDES,
-	CONSTANT_ATTRIBUTE,
-	DICTIONARY_MEMBER,
-	EXTENDED_ATTRIBUTE,
-	MULTI_TYPE,
-	MODEL,
-	ARGUMENT,
-	EXTENDED_ATTRIBUTE_LIST,
-	UNION_TYPE,
 	SEQUENCE,
-	ARGUMENTS,
-	SPECIAL_OPERATION;
+	SPECIAL_OPERATION,
+	TYPEDEF,
+	UNION_TYPE;
 
-	fun startScopeKeyword(): String = "${Glob.startScopeKeyword}$name"
-	fun endScopeKeyword(): String = "${Glob.endScopeKeyword}$name"
 	fun nextScopeKeyword(): String = "${Glob.nextScopeKeyword}$name"
+	fun startScopeKeyword(): String = "${Glob.startScopeKeyword}$name"
+	fun stopScopeKeyword(): String = "${Glob.stopScopeKeyword}$name"
 }

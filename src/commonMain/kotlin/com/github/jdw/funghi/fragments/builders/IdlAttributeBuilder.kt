@@ -3,8 +3,8 @@ package com.github.jdw.funghi.fragments.builders
 import Glob
 import com.github.jdw.funghi.fragments.IdlType
 import com.github.jdw.funghi.pieces.Pieces
-import com.github.jdw.funghi.pieces.Scope
 import com.github.jdw.funghi.pieces.Scope.ATTRIBUTE
+import com.github.jdw.funghi.pieces.Scope.UNION_TYPE
 
 class IdlAttributeBuilder: IdlMemberBuilder() {
 	var extendedAttributes: MutableList<IdlExtendedAttributeBuilder>? = null
@@ -15,7 +15,7 @@ class IdlAttributeBuilder: IdlMemberBuilder() {
 
 
 	override fun puzzle(pieces: Pieces) {
-		pieces popStartScope ATTRIBUTE
+		pieces pop ATTRIBUTE.startScopeKeyword()
 		isReadonly = pieces popIfPresent "readonly"
 		pieces pop "attribute"
 		isUnrestricted = pieces popIfPresent "unrestricted"
@@ -24,17 +24,17 @@ class IdlAttributeBuilder: IdlMemberBuilder() {
 			types += IdlType(IdlTypeBuilder().apply { thus puzzle pieces })
 		}
 		else {
-			pieces popStartScope Scope.UNION_TYPE
+			pieces pop UNION_TYPE.startScopeKeyword()
 
 			var weHaveAnotherType = true
 			val unionTypes = mutableListOf<IdlTypeBuilder>()
 
 			while (weHaveAnotherType) {
 				unionTypes += IdlTypeBuilder().apply { thus puzzle pieces }
-				weHaveAnotherType = pieces popIfPresent Scope.UNION_TYPE.nextScopeKeyword()
+				weHaveAnotherType = pieces popIfPresent UNION_TYPE.nextScopeKeyword()
 			}
 
-			pieces popEndScope Scope.UNION_TYPE
+			pieces pop UNION_TYPE.stopScopeKeyword()
 
 			if (pieces popIfPresent "?") unionTypes.forEach { it.isNullable = true }
 
@@ -43,6 +43,6 @@ class IdlAttributeBuilder: IdlMemberBuilder() {
 
 		name = pieces pop Glob.parserSettings!!.identifierRegex()
 
-		pieces popEndScope ATTRIBUTE
+		pieces pop ATTRIBUTE.stopScopeKeyword()
 	}
 }

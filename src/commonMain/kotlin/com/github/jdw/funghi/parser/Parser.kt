@@ -2,13 +2,14 @@ package com.github.jdw.funghi.parser
 
 
 import Glob
-import com.github.jdw.funghi.pieces.Scope
 import com.github.jdw.funghi.model.IdlModel
 import com.github.jdw.funghi.model.builders.IdlModelBuilder
 import com.github.jdw.funghi.pieces.Pieces
 import com.github.jdw.funghi.pieces.PiecesBuilder
+import com.github.jdw.funghi.pieces.Scope
 import doch
 import echt
+import noop
 import throws
 
 
@@ -25,8 +26,9 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 			.step30RemoveAllWhitespacesExceptSpaceChar()
 			.step40InsertNewLineAtTheRightPlaces()
 			.step50InsertStartOfScopeKeywordAndEndOfScopeKeywordAtTheRightPlaces()
+			.step51InsertStartOfScopeKeywordAndEndOfScopeKeywordAtTheRightPlacesForDictionaries()
 			.step60TrimPieces()
-			.step65AddModelStartAndEndScope()
+			.step65AddModelStartAndStopScope()
 			.step70ToPiecesBuilder()
 			.step300EnhanceExtendedAttributes()
 			.step900CheckScopeSymmetries()
@@ -95,13 +97,21 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 
 	private fun String.step25EmptyArrayAndEmptyDictionaryToKeywords(): String {
 		return this
-			.replace("= [],", "= ${Glob.emptyArrayKeyword} ,")
+			.replace("= [ ] ,", "= ${Glob.emptyArrayKeyword} ,")
 			.replace("= {},", "= ${Glob.emptyDictionaryKeyword} ,")
 			.replace("= [];", "= ${Glob.emptyArrayKeyword} ;")
 			.replace("= {};", "= ${Glob.emptyDictionaryKeyword} ;")
 			.replace("= [])", "= ${Glob.emptyArrayKeyword} )")
 			.replace("= {})", "= ${Glob.emptyDictionaryKeyword} )")
+			.replace("= \"\",", "= ${Glob.emptyStringKeyword} , ")
+			.replace("= \"\")", "= ${Glob.emptyStringKeyword} ) ")
+			.replace("= \"\";", "= ${Glob.emptyStringKeyword} ; ")
+			.replace("= null,", "= ${Glob.nullKeyword} , ")
+			.replace("= null)", "= ${Glob.nullKeyword} ) ")
+			.replace("= null;", "= ${Glob.nullKeyword} ; ")
 
+		//TODO Check if this contains any of [], {} or null
+		//TODO Use regexps instead?
 	}
 
 
@@ -142,7 +152,7 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 			val line = if (lineProto.contains("sequence<") && lineProto.contains(">")) {
 					lineProto
 						.replace("sequence<", " ${Scope.SEQUENCE.startScopeKeyword()} ")
-						.replace(">", " ${Scope.SEQUENCE.endScopeKeyword()} ")
+						.replace(">", " ${Scope.SEQUENCE.stopScopeKeyword()} ")
 				}
 				else lineProto
 
@@ -165,7 +175,7 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 					.replace(",", " , ") //TODO Remove comma for multiple EAs
 					.replace("=", " = ")
 					.replace("[", " ${Scope.EXTENDED_ATTRIBUTE.startScopeKeyword()} ")
-					.replace("]", " ${Scope.EXTENDED_ATTRIBUTE.endScopeKeyword()} ")
+					.replace("]", " ${Scope.EXTENDED_ATTRIBUTE.stopScopeKeyword()} ")
 
 				continue
 			}
@@ -174,14 +184,14 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 				var newLine = if (line.contains(" ${Scope.UNION_TYPE.nextScopeKeyword()} ")) {
 						line
 							.replace("(", " ${Scope.UNION_TYPE.startScopeKeyword()} ")
-							.replace(")", " ${Scope.UNION_TYPE.endScopeKeyword()} ")
+							.replace(")", " ${Scope.UNION_TYPE.stopScopeKeyword()} ")
 					}
 					else line
 					//.replace("attribute", "")
 
 				if (line.endsWith(";")) {
 					newLine = newLine.replace(";", "")
-					ret += "${Scope.ATTRIBUTE.startScopeKeyword()} $newLine ${Scope.ATTRIBUTE.endScopeKeyword()}"
+					ret += "${Scope.ATTRIBUTE.startScopeKeyword()} $newLine ${Scope.ATTRIBUTE.stopScopeKeyword()}"
 				}
 				else {
 					currentScope = Scope.ATTRIBUTE
@@ -200,7 +210,7 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 
 			if (line.contains(" dictionary ")) {
 				currentScope = Scope.DICTIONARY
-				ret += "${Scope.DICTIONARY.startScopeKeyword()} $line"
+				ret += " ${Scope.DICTIONARY.startScopeKeyword()} $line "
 
 				continue
 			}
@@ -211,7 +221,7 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 				val newLine = line.replace("enum", "")
 
 				// Enum as a one-liner or defined on multiple lines
-				if (line.contains("};")) ret += "${Scope.ENUM.startScopeKeyword()} $newLine ${Scope.ENUM.endScopeKeyword()}"
+				if (line.contains("};")) ret += "${Scope.ENUM.startScopeKeyword()} $newLine ${Scope.ENUM.stopScopeKeyword()}"
 				else ret += "${Scope.ENUM.startScopeKeyword()} $newLine "
 
 				continue
@@ -230,7 +240,7 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 					}
 					.echt {
 						newLine = newLine.replace(";", "")
-						ret += "${Scope.TYPEDEF.startScopeKeyword()} $newLine ${Scope.TYPEDEF.endScopeKeyword()}"
+						ret += "${Scope.TYPEDEF.startScopeKeyword()} $newLine ${Scope.TYPEDEF.stopScopeKeyword()}"
 					}
 
 				continue
@@ -241,15 +251,15 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 
 				val newLine = if (line.contains("constructor();"))
 					line // No arguments!
-						.replace("constructor();", "constructor ${Scope.ARGUMENTS.startScopeKeyword()} ${Scope.ARGUMENTS.endScopeKeyword()} ")
+						.replace("constructor();", "constructor ${Scope.ARGUMENTS.startScopeKeyword()} ${Scope.ARGUMENTS.stopScopeKeyword()} ")
 				else line
 					.replace("constructor(", "constructor ${Scope.ARGUMENTS.startScopeKeyword()} ${Scope.ARGUMENT.startScopeKeyword()} ")
-					.replace(");", " ${Scope.ARGUMENT.endScopeKeyword()} ${Scope.ARGUMENTS.endScopeKeyword()} ")
+					.replace(");", " ${Scope.ARGUMENT.stopScopeKeyword()} ${Scope.ARGUMENTS.stopScopeKeyword()} ")
 					.replace(",", " ${Scope.ARGUMENT.nextScopeKeyword()} ")
 					.replace("(", " ${Scope.UNION_TYPE.startScopeKeyword()} ")
-					.replace(")", " ${Scope.UNION_TYPE.endScopeKeyword()} ")
+					.replace(")", " ${Scope.UNION_TYPE.stopScopeKeyword()} ")
 
-				ret += "${Scope.OPERATION_CONSTRUCTOR.startScopeKeyword()} $newLine ${Scope.OPERATION_CONSTRUCTOR.endScopeKeyword()}"
+				ret += "${Scope.OPERATION_CONSTRUCTOR.startScopeKeyword()} $newLine ${Scope.OPERATION_CONSTRUCTOR.stopScopeKeyword()}"
 
 				continue
 			}
@@ -275,23 +285,26 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 				val newLine = line
 					.replace(";", "")
 					.replace("(", " ${Scope.ARGUMENTS.startScopeKeyword()} ${Scope.ARGUMENT.startScopeKeyword()} ")
-					.replace(")", " ${Scope.ARGUMENT.endScopeKeyword()} ${Scope.ARGUMENTS.endScopeKeyword()} ")
+					.replace(")", " ${Scope.ARGUMENT.stopScopeKeyword()} ${Scope.ARGUMENTS.stopScopeKeyword()} ")
 					.replace(",", " ${Scope.ARGUMENT.nextScopeKeyword()} ")
-				ret += "${Scope.SPECIAL_OPERATION.startScopeKeyword()} $newLine ${Scope.SPECIAL_OPERATION.endScopeKeyword()}"
+				ret += "${Scope.SPECIAL_OPERATION.startScopeKeyword()} $newLine ${Scope.SPECIAL_OPERATION.stopScopeKeyword()}"
 
 				continue
 			}
 
-			if (line.contains("};")) {
+			if (line.contains("};")) { //TODO should be == "};"
 				if (null == currentScope) throws()
+
 				ret += when (currentScope) {
-					Scope.DICTIONARY -> Scope.DICTIONARY.endScopeKeyword()
-					Scope.INTERFACE -> Scope.INTERFACE.endScopeKeyword()
+					Scope.DICTIONARY -> Scope.DICTIONARY.stopScopeKeyword()
+					Scope.INTERFACE -> Scope.INTERFACE.stopScopeKeyword()
 					Scope.ENUM -> line
-						.replace("};", " ${Scope.ENUM.endScopeKeyword()} ")
+						.replace("};", " ${Scope.ENUM.stopScopeKeyword()} ")
 						.replace("\",", "\" , ")
 					else -> throws()
 				}
+
+				currentScope = null
 
 				continue
 			}
@@ -308,12 +321,12 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 
 				if (values.isNotEmpty()) {
 					var newLine =
-						if (line.contains("();")) line.replace("();", " ${Scope.ARGUMENTS.startScopeKeyword()} ${Scope.ARGUMENTS.endScopeKeyword()} ")
+						if (line.contains("();")) line.replace("();", " ${Scope.ARGUMENTS.startScopeKeyword()} ${Scope.ARGUMENTS.stopScopeKeyword()} ")
 						else {
 							val newValue = values[0]
 								.replaceFirst("(", " ${Scope.ARGUMENTS.startScopeKeyword()} ${Scope.ARGUMENT.startScopeKeyword()} ")
 								//.replace(") ", " ${Scope.} ) ")
-								.replace(");", " ${Scope.ARGUMENT.endScopeKeyword()} ${Scope.ARGUMENTS.endScopeKeyword()} ")
+								.replace(");", " ${Scope.ARGUMENT.stopScopeKeyword()} ${Scope.ARGUMENTS.stopScopeKeyword()} ")
 								.replace(",", " ${Scope.ARGUMENT.nextScopeKeyword()} ")
 
 							line.replace(values[0], newValue)
@@ -321,9 +334,9 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 
 					newLine = newLine
 						.replace("(", " ${Scope.UNION_TYPE.startScopeKeyword()} ")
-						.replace(")", " ${Scope.UNION_TYPE.endScopeKeyword()} ")
+						.replace(")", " ${Scope.UNION_TYPE.stopScopeKeyword()} ")
 
-					ret += "${Scope.OPERATION.startScopeKeyword()} $newLine ${Scope.OPERATION.endScopeKeyword()}"
+					ret += "${Scope.OPERATION.startScopeKeyword()} $newLine ${Scope.OPERATION.stopScopeKeyword()}"
 
 					continue
 				}
@@ -335,13 +348,13 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 					.replace("=", "")
 					.replace(";", " ;")
 
-				ret += "${Scope.CONSTANT_ATTRIBUTE.startScopeKeyword()} $newLine ${Scope.CONSTANT_ATTRIBUTE.endScopeKeyword()}"
+				ret += "${Scope.CONSTANT_ATTRIBUTE.startScopeKeyword()} $newLine ${Scope.CONSTANT_ATTRIBUTE.stopScopeKeyword()}"
 
 				continue
 			}
 
 			if (line.contains("includes")) {
-				ret += "${Scope.INCLUDES.startScopeKeyword()} $line ${Scope.INCLUDES.endScopeKeyword()}"
+				ret += "${Scope.INCLUDES.startScopeKeyword()} $line ${Scope.INCLUDES.stopScopeKeyword()}"
 
 				continue
 			}
@@ -350,19 +363,62 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 				.echt {
 					when (currentScope) {
 						Scope.ATTRIBUTE -> {
-							ret += "${line.replace(";", "")} ${Scope.ATTRIBUTE.endScopeKeyword()}"
+							ret += "${line.replace(";", "")} ${Scope.ATTRIBUTE.stopScopeKeyword()}"
 							currentScope = Scope.INTERFACE
 						}
 						Scope.TYPEDEF -> {
-							ret += "${line.replace(";", "")} ${Scope.TYPEDEF.endScopeKeyword()}"
+							ret += "${line.replace(";", "")} ${Scope.TYPEDEF.stopScopeKeyword()}"
 							currentScope = null
 						}
+						Scope.DICTIONARY -> noop()
 						else -> {
+							println("--- scope = $currentScope")
 							throws()
 						}
 					}
 				}
 				.doch { ret += line }
+		}
+
+		return ret.joinToString("\n")
+	}
+
+
+	private fun String.step51InsertStartOfScopeKeywordAndEndOfScopeKeywordAtTheRightPlacesForDictionaries(): String {
+		val ret = mutableListOf<String>()
+
+		var currentScope: Scope? = null
+		val lines = this.split("\n")
+		for (idx in lines.indices) {
+			val line = lines[idx].trim()
+
+			if (line.isEmpty()) continue
+
+			if (currentScope != Scope.DICTIONARY) {
+				ret += line
+
+				continue
+			}
+
+			if (line.contains(Scope.DICTIONARY.startScopeKeyword())) {
+				currentScope = Scope.DICTIONARY
+				ret += line
+
+				continue
+			}
+
+			if (line == Scope.DICTIONARY.stopScopeKeyword()) {
+				when (currentScope) {
+					Scope.DICTIONARY -> noop()
+					else -> throws()
+				}
+
+				ret += line
+
+				continue
+			}
+
+			ret += " ${Scope.DICTIONARY_MEMBER.startScopeKeyword()} $line ${Scope.DICTIONARY_MEMBER.stopScopeKeyword()}"
 		}
 
 		return ret.joinToString("\n")
@@ -375,7 +431,7 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 	}
 
 
-	private fun String.step65AddModelStartAndEndScope(): String = "${Scope.MODEL.startScopeKeyword()} $this ${Scope.MODEL.endScopeKeyword()}"
+	private fun String.step65AddModelStartAndStopScope(): String = "${Scope.MODEL.startScopeKeyword()} $this ${Scope.MODEL.stopScopeKeyword()}"
 
 
 	private fun String.step70ToPiecesBuilder(): PiecesBuilder = PiecesBuilder(this)
@@ -406,7 +462,7 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 
 				thus forward 3
 
-				thus push Scope.ARGUMENT.endScopeKeyword()
+				thus push Scope.ARGUMENT.stopScopeKeyword()
 
 				//TODO peek(",")
 			}
@@ -415,7 +471,7 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 
 				thus forwardUntil(")")
 
-				thus replace Scope.EXTENDED_ATTRIBUTE_LIST.endScopeKeyword()
+				thus replace Scope.EXTENDED_ATTRIBUTE_LIST.stopScopeKeyword()
 			}
 		}
 
@@ -436,8 +492,8 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 
 				scopes.addFirst(scope)
 			}
-			else if (piece.startsWith(Glob.endScopeKeyword)) {
-				val value = piece.replace(Glob.endScopeKeyword, "")
+			else if (piece.startsWith(Glob.stopScopeKeyword)) {
+				val value = piece.replace(Glob.stopScopeKeyword, "")
 				val scope = Scope.valueOf(value)
 
 				if (scopes.first() != scope) {
