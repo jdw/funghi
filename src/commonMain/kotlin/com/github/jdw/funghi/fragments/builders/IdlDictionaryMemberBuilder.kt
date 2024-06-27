@@ -3,7 +3,7 @@ package com.github.jdw.funghi.fragments.builders
 import com.github.jdw.funghi.fragments.IdlDictionaryMemberDefaultValue
 import com.github.jdw.funghi.fragments.IdlType
 import com.github.jdw.funghi.pieces.Pieces
-import com.github.jdw.funghi.pieces.Scope.DICTIONARY_MEMBER
+import com.github.jdw.funghi.pieces.Scope.MEMBER
 
 class IdlDictionaryMemberBuilder: IdlFragmentBuilder() {
 	//TODO Extended attributes
@@ -13,12 +13,12 @@ class IdlDictionaryMemberBuilder: IdlFragmentBuilder() {
 
 
 	override fun puzzle(pieces: Pieces) {
-		pieces pop DICTIONARY_MEMBER.startScopeKeyword()
+		pieces pop MEMBER.startScopeKeyword()
 
 		type = IdlType(IdlTypeBuilder().apply { thus puzzle pieces })
 		identifier = pieces pop 1
 		defaultValue = IdlDictionaryMemberDefaultValue(IdlDictionaryMemberDefaultValueBuilder().apply { thus puzzle pieces })
 
-		pieces pop DICTIONARY_MEMBER.stopScopeKeyword()
+		pieces pop MEMBER.stopScopeKeyword()
 	}
 }

@@ -6,7 +6,7 @@ import com.github.jdw.funghi.fragments.IdlExtendedAttribute
 import com.github.jdw.funghi.pieces.Pieces
 import com.github.jdw.funghi.pieces.Scope.ARGUMENT
 import com.github.jdw.funghi.pieces.Scope.EXTENDED_ATTRIBUTE
-import com.github.jdw.funghi.pieces.Scope.EXTENDED_ATTRIBUTE_LIST
+import com.github.jdw.funghi.pieces.Scope.LIST
 
 class IdlExtendedAttributeBuilder: IdlFragmentBuilder() {
 	var name: String? = null
@@ -19,7 +19,7 @@ class IdlExtendedAttributeBuilder: IdlFragmentBuilder() {
 		type = IdlExtendedAttribute.Type.NO_ARGS
 
 		if (pieces popIfPresent "=") {
-			if (pieces popIfPresent EXTENDED_ATTRIBUTE_LIST.startScopeKeyword()) {
+			if (pieces popIfPresent LIST.startScopeKeyword()) {
 				type = IdlExtendedAttribute.Type.IDENT_LIST
 				var weHaveAnotherIdentifier = true
 				while (weHaveAnotherIdentifier) {
@@ -27,7 +27,7 @@ class IdlExtendedAttributeBuilder: IdlFragmentBuilder() {
 					weHaveAnotherIdentifier = pieces popIfPresent ","
 				}
 
-				pieces pop EXTENDED_ATTRIBUTE_LIST.stopScopeKeyword()
+				pieces pop LIST.stopScopeKeyword()
 			}
 			else if (pieces peek Glob.parserSettings!!.identifierRegex()) {
 				identifiers += pieces pop Glob.parserSettings!!.identifierRegex()

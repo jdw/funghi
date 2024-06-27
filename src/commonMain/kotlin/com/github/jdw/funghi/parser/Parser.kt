@@ -259,7 +259,7 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 					.replace("(", " ${Scope.UNION_TYPE.startScopeKeyword()} ")
 					.replace(")", " ${Scope.UNION_TYPE.stopScopeKeyword()} ")
 
-				ret += "${Scope.OPERATION_CONSTRUCTOR.startScopeKeyword()} $newLine ${Scope.OPERATION_CONSTRUCTOR.stopScopeKeyword()}"
+				ret += "${Scope.CONSTRUCTOR.startScopeKeyword()} $newLine ${Scope.CONSTRUCTOR.stopScopeKeyword()}"
 
 				continue
 			}
@@ -348,7 +348,7 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 					.replace("=", "")
 					.replace(";", " ;")
 
-				ret += "${Scope.CONSTANT_ATTRIBUTE.startScopeKeyword()} $newLine ${Scope.CONSTANT_ATTRIBUTE.stopScopeKeyword()}"
+				ret += "${Scope.CONSTANT.startScopeKeyword()} $newLine ${Scope.CONSTANT.stopScopeKeyword()}"
 
 				continue
 			}
@@ -418,7 +418,7 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 				continue
 			}
 
-			ret += " ${Scope.DICTIONARY_MEMBER.startScopeKeyword()} $line ${Scope.DICTIONARY_MEMBER.stopScopeKeyword()}"
+			ret += " ${Scope.MEMBER.startScopeKeyword()} $line ${Scope.MEMBER.stopScopeKeyword()}"
 		}
 
 		return ret.joinToString("\n")
@@ -467,11 +467,11 @@ internal class Parser(val settings: ParserSettings, private val filename: String
 				//TODO peek(",")
 			}
 			else if (peek("(")) {
-				thus replace Scope.EXTENDED_ATTRIBUTE_LIST.startScopeKeyword()
+				thus replace Scope.LIST.startScopeKeyword()
 
 				thus forwardUntil(")")
 
-				thus replace Scope.EXTENDED_ATTRIBUTE_LIST.stopScopeKeyword()
+				thus replace Scope.LIST.stopScopeKeyword()
 			}
 		}
 

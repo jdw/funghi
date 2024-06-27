@@ -9,10 +9,10 @@ import com.github.jdw.funghi.fragments.IdlOperationConstructor
 import com.github.jdw.funghi.fragments.IdlSpecialOperation
 import com.github.jdw.funghi.pieces.Pieces
 import com.github.jdw.funghi.pieces.Scope.ATTRIBUTE
-import com.github.jdw.funghi.pieces.Scope.CONSTANT_ATTRIBUTE
+import com.github.jdw.funghi.pieces.Scope.CONSTANT
 import com.github.jdw.funghi.pieces.Scope.INTERFACE
 import com.github.jdw.funghi.pieces.Scope.OPERATION
-import com.github.jdw.funghi.pieces.Scope.OPERATION_CONSTRUCTOR
+import com.github.jdw.funghi.pieces.Scope.CONSTRUCTOR
 import com.github.jdw.funghi.pieces.Scope.SPECIAL_OPERATION
 import throws
 
@@ -39,10 +39,10 @@ class IdlInterfaceBuilder(extendAttributes: List<IdlExtendedAttribute>) : IdlFra
 
 		while (pieces.peekIsStartScope()) {
 			when (pieces.peekStartScope()) {
-				OPERATION_CONSTRUCTOR -> operationConstructors += IdlOperationConstructor(IdlOperationConstructorBuilder().apply { thus puzzle pieces })
+				CONSTRUCTOR -> operationConstructors += IdlOperationConstructor(IdlOperationConstructorBuilder().apply { thus puzzle pieces })
 				ATTRIBUTE -> attributes += IdlAttribute(IdlAttributeBuilder().apply { thus puzzle pieces })
 				OPERATION -> operations += IdlOperation(IdlOperationBuilder().apply { thus puzzle pieces })
-				CONSTANT_ATTRIBUTE -> constantAttributes += IdlConstantAttribute(IdlConstantAttributeBuilder().apply { thus puzzle pieces })
+				CONSTANT -> constantAttributes += IdlConstantAttribute(IdlConstantAttributeBuilder().apply { thus puzzle pieces })
 				SPECIAL_OPERATION -> specialOperations += IdlSpecialOperation(IdlSpecialOperationBuilder().apply { thus puzzle pieces })
 				else -> thus throwing objection
 			}

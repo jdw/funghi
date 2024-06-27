@@ -4,7 +4,7 @@ import Glob
 import com.github.jdw.funghi.fragments.IdlDictionaryMember
 import com.github.jdw.funghi.pieces.Pieces
 import com.github.jdw.funghi.pieces.Scope.DICTIONARY
-import com.github.jdw.funghi.pieces.Scope.DICTIONARY_MEMBER
+import com.github.jdw.funghi.pieces.Scope.MEMBER
 
 class IdlDictionaryBuilder: IdlFragmentBuilder() {
 	var identifier: String? = null
@@ -24,13 +24,13 @@ class IdlDictionaryBuilder: IdlFragmentBuilder() {
 
 		pieces pop "{"
 
-		if (pieces.peekStartScope() == DICTIONARY_MEMBER) { //TODO Can dictionaries be empty?
+		if (pieces.peekStartScope() == MEMBER) { //TODO Can dictionaries be empty?
 			var weHaveAnotherMember = true
 
 			while (weHaveAnotherMember) {
 				dictionaryMembers += IdlDictionaryMember(IdlDictionaryMemberBuilder().apply { thus puzzle pieces })
 
-				weHaveAnotherMember = pieces.peekStartScope() == DICTIONARY_MEMBER
+				weHaveAnotherMember = pieces.peekStartScope() == MEMBER
 			}
 		}
 
